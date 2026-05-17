@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="theme-color" content="#0d1e3a"/>
+<title>JMS-N · Jewel Model School Notice</title>
+<link id="pwa-manifest" rel="manifest" href=""/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── RESET & BASE ── */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#1a2e4a;overscroll-behavior:none;}
+
+/* ── CSS VARS ── */
+:root{
+  --navy:#0d1e3a;
+  --gold:#c9a44a;
+  --ink:#1a2e4a;
+  --muted:#7a8a9a;
+  --white:#fff;
+  --bg:#f4f1ec;
+  --cream:#e8e2d9;
+  --green:#1a7a4a;
+  --red:#b52b2b;
+  --radius:14px;
+  --shadow:0 2px 12px rgba(13,30,58,.10);
+  --fs-xs:11px;
+  --fs-sm:13px;
+  --fs-md:15px;
+  --fs-lg:18px;
+}
+
+/* ── LOADING ── */
+.loading{position:fixed;inset:0;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;}
+.loading-logo{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;letter-spacing:8px;color:var(--gold);filter:drop-shadow(0 0 20px rgba(201,164,74,.4));}
+.loading-sub{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(201,164,74,.5);margin-top:8px;margin-bottom:32px;}
+.spinner{width:28px;height:28px;border:3px solid rgba(201,164,74,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── AUTH ── */
+.auth-screen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:99;padding:20px;}
+.auth-card{background:rgba(255,255,255,.06);border:1px solid rgba(201,164,74,.2);border-radius:20px;padding:32px 24px;width:100%;max-width:360px;}
+.auth-logo{font-family:'Playfair Display',serif;font-size:36px;font-weight:900;letter-spacing:6px;color:var(--gold);text-align:center;margin-bottom:4px;}
+.auth-sub{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.4);text-align:center;margin-bottom:28px;}
+.auth-input{width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;padding:12px 16px;font-size:var(--fs-sm);color:#fff;margin-bottom:12px;font-family:'Outfit',sans-serif;}
+.auth-input::placeholder{color:rgba(255,255,255,.3);}
+.auth-btn{width:100%;background:var(--gold);color:var(--navy);border:none;border-radius:10px;padding:13px;font-size:var(--fs-sm);font-weight:700;cursor:pointer;margin-top:4px;font-family:'Outfit',sans-serif;}
+.auth-link{width:100%;background:none;border:none;color:rgba(255,255,255,.4);font-size:var(--fs-xs);cursor:pointer;margin-top:12px;display:block;text-align:center;}
+.auth-error{background:rgba(181,43,43,.15);border:1px solid rgba(181,43,43,.3);border-radius:8px;padding:10px 14px;color:#ff8080;font-size:var(--fs-xs);margin-bottom:12px;}
+
+/* ── APP LAYOUT ── */
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.header{background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.header-left{display:flex;align-items:center;gap:10px;}
+.header-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;letter-spacing:4px;color:var(--gold);}
+.header-school{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.4);}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-role{font-size:var(--fs-xs);font-weight:700;color:var(--gold);background:rgba(201,164,74,.15);padding:4px 10px;border-radius:20px;}
+.header-signout{background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;}
+
+/* ── VIEWS ── */
+.views-wrap{flex:1;overflow:hidden;position:relative;}
+.view{position:absolute;inset:0;overflow-y:auto;display:none;flex-direction:column;}
+.view.on{display:flex;}
+.view-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--white);border-bottom:1px solid var(--cream);flex-shrink:0;position:sticky;top:0;z-index:10;}
+.toolbar-title{font-size:var(--fs-md);font-weight:700;color:var(--navy);}
+.toolbar-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:var(--fs-xs);font-weight:700;cursor:pointer;}
+
+/* ── CATEGORY TABS ── */
+.category-tabs{display:flex;gap:6px;padding:10px 16px;background:var(--white);border-bottom:1px solid var(--cream);overflow-x:auto;flex-shrink:0;}
+.category-tabs::-webkit-scrollbar{display:none;}
+.cat-tab{flex-shrink:0;padding:6px 14px;border:1.5px solid var(--cream);border-radius:20px;background:var(--bg);color:var(--muted);font-size:var(--fs-xs);font-weight:700;cursor:pointer;white-space:nowrap;}
+.cat-tab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+/* ── NOTICES ── */
+.notices-list{padding:12px 16px;display:flex;flex-direction:column;gap:10px;}
+.notice-card{background:var(--white);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);cursor:pointer;border-left:4px solid var(--navy);}
+.notice-card.urgent{border-left-color:var(--red);}
+.notice-card.academic{border-left-color:var(--green);}
+.notice-card.events{border-left-color:var(--gold);}
+.notice-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.notice-title{font-size:var(--fs-sm);font-weight:700;color:var(--ink);}
+.notice-cat-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0;text-transform:uppercase;letter-spacing:.5px;}
+.cat-badge-general{background:rgba(13,30,58,.08);color:var(--navy);}
+.cat-badge-urgent{background:rgba(181,43,43,.1);color:var(--red);}
+.cat-badge-academic{background:rgba(26,122,74,.1);color:var(--green);}
+.cat-badge-events{background:rgba(201,164,74,.15);color:#8a6a10;}
+.notice-preview{font-size:var(--fs-xs);color:var(--muted);line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.notice-footer{display:flex;align-items:center;justify-content:space-between;}
+.notice-author{font-size:var(--fs-xs);color:var(--muted);}
+.notice-date{font-size:var(--fs-xs);color:var(--muted);}
+.notices-empty{text-align:center;padding:40px 20px;color:var(--muted);}
+
+/* ── FEEDBACK ── */
+.feedback-form-card,.feedback-check-card{background:var(--white);margin:12px 16px;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);}
+.feedback-form-title{font-size:var(--fs-md);font-weight:700;color:var(--navy);margin-bottom:4px;}
+.feedback-form-sub{font-size:var(--fs-xs);color:var(--muted);margin-bottom:14px;line-height:1.5;}
+.fb-input{width:100%;border:1.5px solid var(--cream);border-radius:8px;padding:10px 12px;font-size:var(--fs-sm);color:var(--ink);background:var(--bg);margin-bottom:10px;font-family:'Outfit',sans-serif;}
+.fb-textarea{width:100%;border:1.5px solid var(--cream);border-radius:8px;padding:10px 12px;font-size:var(--fs-sm);color:var(--ink);background:var(--bg);margin-bottom:10px;font-family:'Outfit',sans-serif;resize:none;}
+.fb-submit-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:12px;font-size:var(--fs-sm);font-weight:700;cursor:pointer;}
+.fb-check-btn{width:100%;background:var(--bg);color:var(--navy);border:1.5px solid var(--cream);border-radius:10px;padding:12px;font-size:var(--fs-sm);font-weight:700;cursor:pointer;margin-top:4px;}
+.fb-ref-badge{background:rgba(13,30,58,.6);border-radius:12px;padding:14px;margin-top:10px;font-size:var(--fs-xs);color:#fff;border:1px solid rgba(255,255,255,.08);}
+.fb-ref-num{font-weight:700;font-size:var(--fs-sm);color:var(--navy);}
+/* Staff feedback list */
+.feedback-item{background:var(--white);margin:8px 16px;border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);}
+.fb-item-name{font-size:var(--fs-sm);font-weight:700;color:var(--navy);}
+.fb-item-msg{font-size:var(--fs-sm);color:var(--ink);margin:6px 0;line-height:1.5;}
+.fb-item-meta{font-size:var(--fs-xs);color:var(--muted);}
+.fb-item-reply{background:rgba(26,122,74,.08);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:var(--fs-xs);color:var(--green);}
+.fb-reply-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:var(--fs-xs);font-weight:700;cursor:pointer;margin-top:8px;}
+
+/* ── CIRCULARS ── */
+.circular-ack-banner{background:var(--navy);margin:12px 16px;border-radius:var(--radius);padding:14px 16px;}
+.cab-text{font-size:var(--fs-xs);color:rgba(255,255,255,.6);line-height:1.5;}
+.circulars-list{padding:0 16px 12px;display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+.circular-card{background:var(--white);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);cursor:pointer;border-left:4px solid var(--gold);}
+.circular-title{font-size:var(--fs-sm);font-weight:700;color:var(--ink);margin-bottom:4px;}
+.circular-meta{font-size:var(--fs-xs);color:var(--muted);}
+.circular-ack-count{font-size:var(--fs-xs);font-weight:700;color:var(--gold);margin-top:6px;}
+/* Ack section in modal */
+.ack-form{margin-top:14px;border-top:1px solid var(--cream);padding-top:14px;}
+.ack-title{font-size:var(--fs-sm);font-weight:700;color:var(--navy);margin-bottom:8px;}
+.ack-input{width:100%;border:1.5px solid var(--cream);border-radius:8px;padding:10px 12px;font-size:var(--fs-sm);color:var(--ink);background:var(--bg);margin-bottom:8px;font-family:'Outfit',sans-serif;}
+.ack-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px;font-size:var(--fs-sm);font-weight:700;cursor:pointer;}
+.ack-list{margin-top:12px;}
+.ack-item{font-size:var(--fs-xs);color:var(--muted);padding:4px 0;border-bottom:1px solid var(--cream);}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{display:flex;background:var(--white);border-top:1px solid var(--cream);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);}
+.bb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;border:none;background:none;color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;gap:3px;font-family:'Outfit',sans-serif;}
+.bb.active{color:var(--navy);}
+.bi{font-size:18px;line-height:1;}
+
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(13,30,58,.6);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0;}
+.modal-card{background:var(--white);border-radius:20px 20px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:20px 16px 32px;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.modal-title{font-size:var(--fs-md);font-weight:700;color:var(--navy);}
+.modal-close{background:var(--bg);border:none;color:var(--muted);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;}
+.modal-input{width:100%;border:1.5px solid var(--cream);border-radius:8px;padding:10px 12px;font-size:var(--fs-sm);color:var(--ink);background:var(--bg);margin-bottom:10px;font-family:'Outfit',sans-serif;}
+.modal-textarea{width:100%;border:1.5px solid var(--cream);border-radius:8px;padding:10px 12px;font-size:var(--fs-sm);color:var(--ink);background:var(--bg);margin-bottom:10px;font-family:'Outfit',sans-serif;resize:none;}
+.modal-submit-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:13px;font-size:var(--fs-sm);font-weight:700;cursor:pointer;margin-top:4px;}
+.modal-sms-row{margin-bottom:10px;}
+.modal-sms-label{font-size:var(--fs-xs);color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;}
+/* Notice detail */
+.nd-meta{font-size:var(--fs-xs);color:var(--muted);margin-bottom:12px;}
+.nd-body{font-size:var(--fs-sm);color:var(--ink);line-height:1.7;white-space:pre-wrap;}
+.nd-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.nd-action-btn{background:var(--bg);border:1.5px solid var(--cream);color:var(--navy);border-radius:8px;padding:8px 14px;font-size:var(--fs-xs);font-weight:700;cursor:pointer;}
+.nd-action-btn.danger{color:var(--red);border-color:rgba(181,43,43,.3);}
+.nd-action-btn.gold{background:var(--navy);color:var(--gold);border-color:var(--navy);}
+/* Feedback detail */
+.fb-detail{background:var(--bg);border-radius:8px;padding:12px;margin-bottom:12px;font-size:var(--fs-sm);color:var(--ink);line-height:1.6;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 20px;border-radius:20px;font-size:var(--fs-xs);font-weight:600;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+
+/* ── UTILITIES ── */
+.hidden{display:none!important;}
+
+/* ── WELCOME SCREEN ── */
+.welcome-screen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:99;padding:24px;}
+.welcome-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 20%, rgba(201,164,74,.12) 0%, transparent 60%),radial-gradient(ellipse at 80% 80%, rgba(201,164,74,.08) 0%, transparent 60%);pointer-events:none;}
+.welcome-content{position:relative;width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center;}
+.welcome-logo{font-family:'Playfair Display',serif;font-size:56px;font-weight:900;letter-spacing:8px;color:var(--gold);filter:drop-shadow(0 0 30px rgba(201,164,74,.35));margin-bottom:8px;}
+.welcome-school{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:center;margin-bottom:6px;}
+.welcome-tagline{font-size:var(--fs-xs);color:rgba(201,164,74,.5);text-align:center;margin-bottom:48px;letter-spacing:1px;}
+.welcome-buttons{width:100%;display:flex;flex-direction:column;gap:14px;}
+.welcome-parent-btn{width:100%;background:var(--gold);border:none;border-radius:16px;padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;position:relative;overflow:hidden;}
+.welcome-staff-btn{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:16px;padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;position:relative;overflow:hidden;}
+.welcome-btn-icon{font-size:28px;flex-shrink:0;}
+.welcome-btn-text{flex:1;}
+.welcome-parent-btn .welcome-btn-title{font-size:var(--fs-md);font-weight:700;color:var(--navy);}
+.welcome-parent-btn .welcome-btn-sub{font-size:var(--fs-xs);color:rgba(13,30,58,.6);margin-top:2px;}
+.welcome-staff-btn .welcome-btn-title{font-size:var(--fs-md);font-weight:700;color:#fff;}
+.welcome-staff-btn .welcome-btn-sub{font-size:var(--fs-xs);color:rgba(255,255,255,.4);margin-top:2px;}
+.welcome-btn-arrow{font-size:18px;flex-shrink:0;}
+.welcome-parent-btn .welcome-btn-arrow{color:var(--navy);}
+.welcome-staff-btn .welcome-btn-arrow{color:rgba(255,255,255,.4);}
+
+/* ── AUTH BACK BUTTON ── */
+.auth-back-btn{background:none;border:none;color:rgba(255,255,255,.4);font-size:var(--fs-xs);cursor:pointer;margin-bottom:16px;padding:4px 0;display:block;font-family:'Outfit',sans-serif;}
+
+/* ── RIPPLE EFFECT ── */
+.ripple{position:relative;overflow:hidden;}
+.ripple::after{content:'';position:absolute;border-radius:50%;background:rgba(255,255,255,.25);transform:scale(0);animation:none;pointer-events:none;}
+.ripple:active::after{width:200px;height:200px;margin-top:-100px;margin-left:-100px;top:50%;left:50%;animation:ripple-anim .4s ease-out;}
+@keyframes ripple-anim{to{transform:scale(2.5);opacity:0;}}
+
+/* Button press feel */
+.ripple:active{transform:scale(0.97);transition:transform .1s ease;}
+/* ── FEEDBACK REFERENCE LOOKUP ── */
+.fb-ref-original{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;margin-bottom:10px;}
+.fb-ref-reply{background:rgba(201,164,74,.15);border:1px solid rgba(201,164,74,.35);border-radius:10px;padding:12px;}
+.fb-ref-pending{color:rgba(255,255,255,.4);font-size:var(--fs-xs);text-align:center;padding:8px 0;}
+.fb-ref-label{font-size:var(--fs-xs);font-weight:700;color:var(--gold);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.fb-ref-date{font-weight:400;color:rgba(255,255,255,.5);}
+.fb-ref-message{font-size:var(--fs-sm);color:#fff;line-height:1.5;font-weight:400;}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading" id="loading">
+  <div class="loading-logo">JMS-N</div>
+  <div class="loading-sub">Jewel Model School Notice</div>
+  <div class="spinner"></div>
+</div>
+
+<!-- WELCOME SCREEN -->
+<div class="welcome-screen hidden" id="welcomeScreen">
+  <div class="welcome-bg"></div>
+  <div class="welcome-content">
+    <div class="welcome-logo">JMS-N</div>
+    <div class="welcome-school">Jewel Model Primary School</div>
+    <div class="welcome-tagline">Stay informed. Stay connected.</div>
+    <div class="welcome-buttons">
+      <button class="welcome-parent-btn ripple" onclick="enterAsPublic()">
+        <span class="welcome-btn-icon">👨‍👩‍👧</span>
+        <div class="welcome-btn-text">
+          <div class="welcome-btn-title">I'm a Parent</div>
+          <div class="welcome-btn-sub">View notices, circulars & feedback</div>
+        </div>
+        <span class="welcome-btn-arrow">→</span>
+      </button>
+      <button class="welcome-staff-btn ripple" onclick="showStaffLogin()">
+        <span class="welcome-btn-icon">🏫</span>
+        <div class="welcome-btn-text">
+          <div class="welcome-btn-title">Staff Login</div>
+          <div class="welcome-btn-sub">For teachers and administrators</div>
+        </div>
+        <span class="welcome-btn-arrow">→</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- STAFF LOGIN MODAL -->
+<div class="auth-screen hidden" id="authScreen">
+  <div class="auth-card">
+    <button class="auth-back-btn ripple" onclick="showWelcome()">← Back</button>
+    <div class="auth-logo">JMS-N</div>
+    <div class="auth-sub">Staff Portal</div>
+    <div id="authError" class="auth-error hidden"></div>
+    <input type="email" id="authEmail" placeholder="Email address" class="auth-input"/>
+    <input type="password" id="authPassword" placeholder="Password" class="auth-input"/>
+    <button class="auth-btn ripple" onclick="signIn()">Sign In</button>
+    <button class="auth-link ripple" onclick="showForgotPassword()">Forgot password?</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app hidden" id="app">
+
+  <!-- HEADER -->
+  <header class="header" id="mainHeader">
+    <div class="header-left">
+      <div class="header-logo">JMS-N</div>
+      <div class="header-school">Jewel Model Primary School</div>
+    </div>
+    <div class="header-right">
+      <span class="header-role" id="headerRole"></span>
+      <button class="header-staff-login" id="headerStaffLogin" onclick="signOut()" style="display:none;">Sign Out</button>
+      <button class="header-signout ripple" id="headerSignout" onclick="signOut()" style="display:none;">↩</button>
+    </div>
+  </header>
+
+  <!-- VIEWS -->
+  <div class="views-wrap" id="viewsWrap">
+
+    <!-- NOTICEBOARD -->
+    <div class="view on" id="vNotices">
+      <div class="view-toolbar" id="noticeToolbar">
+        <div class="toolbar-title">📢 Noticeboard</div>
+        <button class="toolbar-btn ripple" id="addNoticeBtn" onclick="openNoticeModal()">+ Post</button>
+      </div>
+      <div class="category-tabs" id="categoryTabs">
+        <button class="cat-tab active" onclick="filterNotices('All',this)">All</button>
+        <button class="cat-tab" onclick="filterNotices('General',this)">General</button>
+        <button class="cat-tab" onclick="filterNotices('Urgent',this)">Urgent</button>
+        <button class="cat-tab" onclick="filterNotices('Academic',this)">Academic</button>
+        <button class="cat-tab" onclick="filterNotices('Events',this)">Events</button>
+      </div>
+      <div class="notices-list" id="noticesList"></div>
+    </div>
+
+    <!-- FEEDBACK -->
+    <div class="view" id="vFeedback">
+      <div class="view-toolbar">
+        <div class="toolbar-title">📬 Feedback</div>
+        <button class="toolbar-btn ripple" id="viewFeedbackBtn" onclick="toggleFeedbackView()">My Submissions</button>
+      </div>
+      <!-- Public submission form -->
+      <div id="feedbackPublic">
+        <div class="feedback-form-card">
+          <div class="feedback-form-title">Share your thoughts</div>
+          <p class="feedback-form-sub">Your feedback helps us improve. Name is optional.</p>
+          <input type="text" id="fbName" placeholder="Your name (optional)" class="fb-input"/>
+          <textarea id="fbMessage" placeholder="Write your feedback or complaint here..." class="fb-textarea" rows="5"></textarea>
+          <button class="fb-submit-btn ripple" onclick="submitFeedback()">Submit Feedback</button>
+        </div>
+        <div class="feedback-check-card">
+          <div class="feedback-form-title">Check a reply</div>
+          <p class="feedback-form-sub">Enter your reference number to see if we've replied.</p>
+          <input type="text" id="fbRef" placeholder="Reference number e.g. FB-1234" class="fb-input"/>
+          <button class="fb-check-btn ripple" onclick="checkFeedbackReply()">Check Reply</button>
+          <div id="fbReplyResult"></div>
+        </div>
+      </div>
+      <!-- Staff view -->
+      <div id="feedbackStaff" style="display:none;">
+        <div id="feedbackList"></div>
+      </div>
+    </div>
+
+    <!-- CIRCULARS -->
+    <div class="view" id="vCirculars">
+      <div class="view-toolbar">
+        <div class="toolbar-title">📄 Circulars</div>
+        <button class="toolbar-btn ripple" id="addCircularBtn" onclick="openCircularModal()">+ New</button>
+      </div>
+      <!-- Public ack form -->
+      <div id="circularPublic">
+        <div class="circular-ack-banner">
+          <div class="cab-text">Tap a circular below to read and acknowledge receipt.</div>
+        </div>
+      </div>
+      <div class="circulars-list" id="circularsList"></div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="bb active ripple" id="bb0" onclick="switchView(0)"><span class="bi">📢</span>Notices</button>
+    <button class="bb ripple" id="bb1" onclick="switchView(1)"><span class="bi">📬</span>Feedback</button>
+    <button class="bb ripple" id="bb2" onclick="switchView(2)"><span class="bi">📄</span>Circulars</button>
+  </nav>
+
+</div>
+
+<!-- MODALS -->
+
+<!-- Post Notice Modal -->
+<div class="modal-overlay hidden" id="noticeModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="noticeModalTitle">Post a Notice</div>
+      <button class="modal-close ripple" onclick="closeNoticeModal()">✕</button>
+    </div>
+    <input type="text" id="noticeTitle" placeholder="Notice title" class="modal-input"/>
+    <select id="noticeCategory" class="modal-input">
+      <option value="General">General</option>
+      <option value="Urgent">Urgent</option>
+      <option value="Academic">Academic</option>
+      <option value="Events">Events</option>
+    </select>
+    <textarea id="noticeBody" placeholder="Write your notice here..." class="modal-textarea" rows="6"></textarea>
+    <div class="modal-sms-row">
+      <label class="modal-sms-label">
+        <input type="checkbox" id="noticeSms" checked/> Notify parents via SMS
+      </label>
+    </div>
+    <button class="modal-submit-btn ripple" onclick="saveNotice()">Post Notice</button>
+  </div>
+</div>
+
+<!-- Notice Detail Modal -->
+<div class="modal-overlay hidden" id="noticeDetailModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="ndTitle"></div>
+      <button class="modal-close ripple" onclick="closeModal('noticeDetailModal')">✕</button>
+    </div>
+    <div class="nd-meta" id="ndMeta"></div>
+    <div class="nd-body" id="ndBody"></div>
+    <div class="nd-actions" id="ndActions"></div>
+  </div>
+</div>
+
+<!-- Feedback Reply Modal -->
+<div class="modal-overlay hidden" id="feedbackReplyModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">Reply to Feedback</div>
+      <button class="modal-close ripple" onclick="closeModal('feedbackReplyModal')">✕</button>
+    </div>
+    <div class="fb-detail" id="fbDetail"></div>
+    <textarea id="fbReplyText" placeholder="Write your reply..." class="modal-textarea" rows="4"></textarea>
+    <button class="modal-submit-btn ripple" onclick="submitFeedbackReply()">Send Reply</button>
+  </div>
+</div>
+
+<!-- Circular Modal -->
+<div class="modal-overlay hidden" id="circularModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">New Circular</div>
+      <button class="modal-close ripple" onclick="closeModal('circularModal')">✕</button>
+    </div>
+    <input type="text" id="circularTitle" placeholder="Circular title" class="modal-input"/>
+    <textarea id="circularBody" placeholder="Write the circular content here..." class="modal-textarea" rows="8"></textarea>
+    <button class="modal-submit-btn ripple" onclick="saveCircular()">Publish Circular</button>
+  </div>
+</div>
+
+<!-- Circular Detail Modal -->
+<div class="modal-overlay hidden" id="circularDetailModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="cdTitle"></div>
+      <button class="modal-close ripple" onclick="closeModal('circularDetailModal')">✕</button>
+    </div>
+    <div class="nd-meta" id="cdMeta"></div>
+    <div class="nd-body" id="cdBody"></div>
+    <div id="cdAckSection"></div>
+    <div class="nd-actions" id="cdActions"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast hidden" id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const SUPA_URL = 'https://orfhhiyaigeokebwglkb.supabase.co';
+const SUPA_KEY = 'sb_publishable_BsLkDNVCE4FrJ-P4i5eGIw_euUo4SNm';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let currentUser = null;
+let currentRole = 'public'; // 'teacher' | 'admin' | 'public'
+let notices = [];
+let feedbackItems = [];
+let circulars = [];
+let noticeFilter = 'All';
+let activeFeedbackId = null;
+let splashStart = Date.now();
+
+// ── PWA MANIFEST ─────────────────────────────────────────────────────────────
+const manifest = {
+  name: 'JMS-N',
+  short_name: 'JMS-N',
+  description: 'Jewel Model School Notice',
+  start_url: './',
+  display: 'standalone',
+  background_color: '#0d1e3a',
+  theme_color: '#0d1e3a',
+  orientation: 'portrait',
+  icons: [{
+    src: "data:image/svg+xml," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='#0d1e3a'/><text x='96' y='120' font-size='48' font-family='Georgia' font-weight='bold' fill='#c9a44a' text-anchor='middle'>JMS-N</text></svg>`),
+    sizes: '192x192',
+    type: 'image/svg+xml',
+    purpose: 'any maskable'
+  }]
+};
+document.getElementById('pwa-manifest').href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/json' }));
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  await checkSession();
+});
+
+async function checkSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadUserRole();
+    hideLoading();
+    showApp();
+  } else {
+    hideLoading();
+    showWelcome();
+  }
+}
+
+function showWelcome() {
+  document.getElementById('welcomeScreen').classList.remove('hidden');
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('app').classList.add('hidden');
+}
+
+function showStaffLogin() {
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  document.getElementById('authScreen').classList.remove('hidden');
+}
+
+function enterAsPublic() {
+  currentRole = 'public';
+  currentUser = null;
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  showApp();
+}
+
+function hideLoading() {
+  const elapsed = Date.now() - splashStart;
+  const delay = Math.max(0, 3000 - elapsed);
+  setTimeout(() => document.getElementById('loading').classList.add('hidden'), delay);
+}
+
+function showAuthScreen() {
+  document.getElementById('authScreen').classList.remove('hidden');
+}
+
+function showApp() {
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  const isStaff = currentRole === 'admin' || currentRole === 'teacher';
+  const roleLabel = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : 'Parent';
+  document.getElementById('headerRole').textContent = roleLabel;
+  document.getElementById('addNoticeBtn').style.display = isStaff ? 'block' : 'none';
+  document.getElementById('addCircularBtn').style.display = isStaff ? 'block' : 'none';
+  document.getElementById('viewFeedbackBtn').style.display = isStaff ? 'block' : 'none';
+  const staffLoginBtn = document.getElementById('headerStaffLogin');
+  const signoutBtn = document.getElementById('headerSignout');
+  if (staffLoginBtn) staffLoginBtn.style.display = isStaff ? 'none' : 'block';
+  if (signoutBtn) signoutBtn.style.display = isStaff ? 'block' : 'none';
+  loadNotices();
+  loadCirculars();
+}
+
+async function loadUserRole() {
+  try {
+    const { data } = await sb.from('profiles').select('role').eq('id', currentUser.id).single();
+    currentRole = data?.role || 'teacher';
+  } catch (e) {
+    currentRole = 'teacher';
+  }
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+async function signIn() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  if (!email || !password) { showAuthError('Please enter email and password'); return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { showAuthError(error.message); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  currentUser = session.user;
+  await loadUserRole();
+  showApp();
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+async function signOut() {
+  if (currentRole !== 'public') {
+    await sb.auth.signOut();
+  }
+  currentUser = null;
+  currentRole = 'public';
+  document.getElementById('app').classList.add('hidden');
+  ['addNoticeBtn','addCircularBtn','viewFeedbackBtn'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.style.display = 'none';
+  });
+  const staffEl = document.getElementById('feedbackStaff');
+  const pubEl = document.getElementById('feedbackPublic');
+  if (staffEl) staffEl.style.display = 'none';
+  if (pubEl) pubEl.style.display = 'block';
+  document.getElementById('headerRole').textContent = '';
+  const staffLoginBtn = document.getElementById('headerStaffLogin');
+  const signoutBtn = document.getElementById('headerSignout');
+  if (staffLoginBtn) staffLoginBtn.style.display = 'none';
+  if (signoutBtn) signoutBtn.style.display = 'none';
+  showWelcome();
+}
+
+function showForgotPassword() {
+  const email = prompt('Enter your email address:');
+  if (!email) return;
+  sb.auth.resetPasswordForEmail(email).then(() => toast('Password reset email sent'));
+}
+
+// ── VIEWS ────────────────────────────────────────────────────────────────────
+const VIEWS = ['vNotices', 'vFeedback', 'vCirculars'];
+
+function switchView(idx) {
+  VIEWS.forEach((v, i) => {
+    document.getElementById(v).classList.toggle('on', i === idx);
+    document.getElementById('bb' + i).classList.toggle('active', i === idx);
+  });
+  if (idx === 1) loadFeedback();
+  if (idx === 2) loadCirculars();
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 3000);
+}
+
+// ── MODAL HELPERS ─────────────────────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+// ── NOTICES ───────────────────────────────────────────────────────────────────
+async function loadNotices() {
+  const { data, error } = await sb.from('notices').select('*').order('created_at', { ascending: false });
+  if (error) { toast('Failed to load notices'); return; }
+  notices = data || [];
+  renderNotices();
+}
+
+function filterNotices(cat, btn) {
+  noticeFilter = cat;
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderNotices();
+}
+
+function renderNotices() {
+  const list = document.getElementById('noticesList');
+  const filtered = noticeFilter === 'All' ? notices : notices.filter(n => n.category === noticeFilter);
+  if (!filtered.length) {
+    list.innerHTML = '<div class="notices-empty">No notices yet.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(n => {
+    const date = new Date(n.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const catClass = n.category.toLowerCase();
+    return `
+      <div class="notice-card ${catClass}" onclick="openNoticeDetail('${n.id}')">
+        <div class="notice-card-header">
+          <div class="notice-title">${n.title}</div>
+          <span class="notice-cat-badge cat-badge-${catClass}">${n.category}</span>
+        </div>
+        <div class="notice-preview">${n.body}</div>
+        <div class="notice-footer">
+          <span class="notice-author">${n.author}</span>
+          <span class="notice-date">${date}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openNoticeModal() {
+  document.getElementById('noticeTitle').value = '';
+  document.getElementById('noticeBody').value = '';
+  document.getElementById('noticeCategory').value = 'General';
+  document.getElementById('noticeSms').checked = true;
+  document.getElementById('noticeModal').classList.remove('hidden');
+}
+
+function closeNoticeModal() {
+  document.getElementById('noticeModal').classList.add('hidden');
+}
+
+async function saveNotice() {
+  const title = document.getElementById('noticeTitle').value.trim();
+  const body = document.getElementById('noticeBody').value.trim();
+  const category = document.getElementById('noticeCategory').value;
+  const sendSms = document.getElementById('noticeSms').checked;
+  if (!title || !body) { toast('Please fill in title and body'); return; }
+  const author = currentUser?.email?.split('@')[0] || 'Staff';
+  const { data, error } = await sb.from('notices').insert({
+    title, body, category, author,
+    author_id: currentUser?.id,
+    sms_sent: false
+  }).select().single();
+  if (error) { toast('Failed to post notice'); return; }
+  notices.unshift(data);
+  renderNotices();
+  closeNoticeModal();
+  toast('✅ Notice posted');
+  if (sendSms) await sendNoticeSms(data);
+}
+
+async function sendNoticeSms(notice) {
+  // Get all parent numbers from fees table
+  const { data: feeData } = await sb.from('fees').select('parent_phone').not('parent_phone', 'is', null).neq('parent_phone', '');
+  if (!feeData || !feeData.length) return;
+  const phones = [...new Set(feeData.map(f => f.parent_phone).filter(Boolean))];
+  const message = `[${notice.category}] ${notice.title}: ${notice.body.slice(0, 100)}${notice.body.length > 100 ? '...' : ''} — Jewel Model Primary School`;
+  let sent = 0;
+  for (const phone of phones) {
+    try {
+      await fetch(`${SUPA_URL}/functions/v1/send-sms`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` },
+        body: JSON.stringify({ to: phone, message, provider: 'kudisms' })
+      });
+      sent++;
+    } catch (e) { console.warn('SMS failed for', phone); }
+  }
+  await sb.from('notices').update({ sms_sent: true }).eq('id', notice.id);
+  toast(`📨 SMS sent to ${sent} parents`);
+}
+
+function openNoticeDetail(id) {
+  const n = notices.find(x => x.id === id);
+  if (!n) return;
+  const date = new Date(n.created_at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('ndTitle').textContent = n.title;
+  document.getElementById('ndMeta').textContent = `${n.category} · ${n.author} · ${date}`;
+  document.getElementById('ndBody').textContent = n.body;
+  const actions = document.getElementById('ndActions');
+  const isStaff = currentRole === 'admin' || currentRole === 'teacher';
+  const isAuthor = n.author_id === currentUser?.id;
+  actions.innerHTML = isStaff && isAuthor
+    ? `<button class="nd-action-btn danger" onclick="deleteNotice('${n.id}')">🗑 Delete</button>`
+    : '';
+  document.getElementById('noticeDetailModal').classList.remove('hidden');
+}
+
+async function deleteNotice(id) {
+  if (!confirm('Delete this notice?')) return;
+  await sb.from('notices').delete().eq('id', id);
+  notices = notices.filter(n => n.id !== id);
+  renderNotices();
+  closeModal('noticeDetailModal');
+  toast('Notice deleted');
+}
+
+// ── FEEDBACK ──────────────────────────────────────────────────────────────────
+async function loadFeedback() {
+  const isStaff = currentRole === 'admin' || currentRole === 'teacher';
+  if (!isStaff) return;
+  const { data } = await sb.from('feedback').select('*').order('created_at', { ascending: false });
+  feedbackItems = data || [];
+  renderFeedbackList();
+}
+
+function toggleFeedbackView() {
+  const pub = document.getElementById('feedbackPublic');
+  const staff = document.getElementById('feedbackStaff');
+  const btn = document.getElementById('viewFeedbackBtn');
+  const isShowing = staff.style.display !== 'none';
+  staff.style.display = isShowing ? 'none' : 'block';
+  pub.style.display = isShowing ? 'block' : 'none';
+  btn.textContent = isShowing ? 'View Inbox' : 'Submit Form';
+  if (!isShowing) loadFeedback();
+}
+
+function renderFeedbackList() {
+  const list = document.getElementById('feedbackList');
+  if (!feedbackItems.length) {
+    list.innerHTML = '<div class="notices-empty">No feedback yet.</div>';
+    return;
+  }
+  list.innerHTML = feedbackItems.map(f => {
+    const date = new Date(f.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const refNum = 'FB-' + f.id.slice(0, 4).toUpperCase();
+    return `
+      <div class="feedback-item">
+        <div class="fb-item-name">${f.name || 'Anonymous'} <span class="fb-item-meta">· ${refNum} · ${date}</span></div>
+        <div class="fb-item-msg">${f.message}</div>
+        ${f.reply ? `<div class="fb-item-reply">✅ Replied: ${f.reply}</div>` : `<button class="fb-reply-btn" onclick="openFeedbackReply('${f.id}')">Reply</button>`}
+      </div>
+    `;
+  }).join('');
+}
+
+async function submitFeedback() {
+  const name = document.getElementById('fbName').value.trim();
+  const message = document.getElementById('fbMessage').value.trim();
+  if (!message) { toast('Please write your feedback'); return; }
+  const { data, error } = await sb.from('feedback').insert({ name: name || null, message }).select().single();
+  if (error) { toast('Failed to submit feedback'); return; }
+  const refNum = 'FB-' + data.id.slice(0, 4).toUpperCase();
+  document.getElementById('fbName').value = '';
+  document.getElementById('fbMessage').value = '';
+  document.getElementById('fbReplyResult').innerHTML = `
+    <div class="fb-ref-badge">
+      ✅ Feedback submitted! Your reference number is:<br/>
+      <span class="fb-ref-num">${refNum}</span><br/>
+      Keep this number to check for a reply later.
+    </div>
+  `;
+  toast('✅ Feedback submitted');
+}
+
+async function checkFeedbackReply() {
+  const ref = document.getElementById('fbRef').value.trim().toUpperCase();
+  if (!ref.startsWith('FB-')) { toast('Invalid reference number'); return; }
+  const code = ref.replace('FB-', '').toLowerCase();
+  const { data: allData } = await sb.from('feedback').select('*');
+  const data = allData ? allData.find(f => f.id.slice(0, 4).toLowerCase() === code) : null;
+  const el = document.getElementById('fbReplyResult');
+  if (!data) {
+    el.innerHTML = '<div class="fb-ref-badge">No feedback found with that reference number.</div>';
+    return;
+  }
+  const date = new Date(data.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  el.innerHTML = `
+    <div class="fb-ref-badge">
+      <div class="fb-ref-original">
+        <div class="fb-ref-label">📝 Your message <span class="fb-ref-date">${date}</span></div>
+        <div class="fb-ref-message">${data.message}</div>
+      </div>
+      ${data.reply
+        ? `<div class="fb-ref-reply"><div class="fb-ref-label">✅ School's reply</div><div class="fb-ref-message">${data.reply}</div></div>`
+        : `<div class="fb-ref-pending">⏳ No reply yet. Please check back later.</div>`
+      }
+    </div>`;
+}
+
+function openFeedbackReply(id) {
+  activeFeedbackId = id;
+  const f = feedbackItems.find(x => x.id === id);
+  if (!f) return;
+  document.getElementById('fbDetail').textContent = f.message;
+  document.getElementById('fbReplyText').value = '';
+  document.getElementById('feedbackReplyModal').classList.remove('hidden');
+}
+
+async function submitFeedbackReply() {
+  const reply = document.getElementById('fbReplyText').value.trim();
+  if (!reply) { toast('Write a reply first'); return; }
+  const author = currentUser?.email?.split('@')[0] || 'Staff';
+  const { error } = await sb.from('feedback').update({
+    reply,
+    replied_at: new Date().toISOString(),
+    replied_by: author
+  }).eq('id', activeFeedbackId);
+  if (error) { toast('Failed to send reply'); return; }
+  closeModal('feedbackReplyModal');
+  toast('✅ Reply sent');
+  loadFeedback();
+}
+
+// ── CIRCULARS ─────────────────────────────────────────────────────────────────
+async function loadCirculars() {
+  const { data } = await sb.from('circulars').select('*, circular_acks(id, parent_name, acknowledged_at)').order('created_at', { ascending: false });
+  circulars = data || [];
+  renderCirculars();
+}
+
+function renderCirculars() {
+  const list = document.getElementById('circularsList');
+  if (!circulars.length) {
+    list.innerHTML = '<div class="notices-empty">No circulars yet.</div>';
+    return;
+  }
+  list.innerHTML = circulars.map(c => {
+    const date = new Date(c.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const ackCount = c.circular_acks?.length || 0;
+    return `
+      <div class="circular-card" onclick="openCircularDetail('${c.id}')">
+        <div class="circular-title">${c.title}</div>
+        <div class="circular-meta">${c.author} · ${date}</div>
+        <div class="circular-ack-count">✅ ${ackCount} acknowledged</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openCircularModal() {
+  document.getElementById('circularTitle').value = '';
+  document.getElementById('circularBody').value = '';
+  document.getElementById('circularModal').classList.remove('hidden');
+}
+
+async function saveCircular() {
+  const title = document.getElementById('circularTitle').value.trim();
+  const body = document.getElementById('circularBody').value.trim();
+  if (!title || !body) { toast('Please fill in title and content'); return; }
+  const author = currentUser?.email?.split('@')[0] || 'Staff';
+  const { data, error } = await sb.from('circulars').insert({
+    title, body, author, author_id: currentUser?.id
+  }).select().single();
+  if (error) { toast('Failed to publish circular'); return; }
+  closeModal('circularModal');
+  toast('✅ Circular published');
+  loadCirculars();
+}
+
+function openCircularDetail(id) {
+  const c = circulars.find(x => x.id === id);
+  if (!c) return;
+  const date = new Date(c.created_at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('cdTitle').textContent = c.title;
+  document.getElementById('cdMeta').textContent = `${c.author} · ${date}`;
+  document.getElementById('cdBody').textContent = c.body;
+
+  const isStaff = currentRole === 'admin' || currentRole === 'teacher';
+  const acks = c.circular_acks || [];
+
+  // Ack section
+  const ackSection = document.getElementById('cdAckSection');
+  if (isStaff) {
+    ackSection.innerHTML = `
+      <div class="ack-form">
+        <div class="ack-title">📋 Acknowledgements (${acks.length})</div>
+        <div class="ack-list">
+          ${acks.length ? acks.map(a => `<div class="ack-item">✅ ${a.parent_name} — ${new Date(a.acknowledged_at).toLocaleDateString('en-GB')}</div>`).join('') : '<div class="ack-item">No acknowledgements yet.</div>'}
+        </div>
+      </div>
+    `;
+  } else {
+    ackSection.innerHTML = `
+      <div class="ack-form">
+        <div class="ack-title">Acknowledge Receipt</div>
+        <input type="text" id="ackName" placeholder="Your name" class="ack-input"/>
+        <button class="ack-btn" onclick="submitAck('${c.id}')">✅ I've Read This</button>
+      </div>
+    `;
+  }
+
+  // Actions
+  const actions = document.getElementById('cdActions');
+  const isAuthor = c.author_id === currentUser?.id;
+  actions.innerHTML = isStaff
+    ? `
+      <button class="nd-action-btn gold" onclick="downloadCircularPdf('${c.id}')">📄 Download PDF</button>
+      ${isAuthor ? `<button class="nd-action-btn danger" onclick="deleteCircular('${c.id}')">🗑 Delete</button>` : ''}
+    `
+    : `<button class="nd-action-btn gold" onclick="downloadCircularPdf('${c.id}')">📄 Download PDF</button>`;
+
+  document.getElementById('circularDetailModal').classList.remove('hidden');
+}
+
+async function submitAck(circularId) {
+  const name = document.getElementById('ackName')?.value.trim();
+  if (!name) { toast('Please enter your name'); return; }
+  const { error } = await sb.from('circular_acks').insert({ circular_id: circularId, parent_name: name });
+  if (error) { toast('Failed to acknowledge'); return; }
+  toast('✅ Thank you! Acknowledgement recorded');
+  closeModal('circularDetailModal');
+  loadCirculars();
+}
+
+async function deleteCircular(id) {
+  if (!confirm('Delete this circular?')) return;
+  await sb.from('circulars').delete().eq('id', id);
+  closeModal('circularDetailModal');
+  toast('Circular deleted');
+  loadCirculars();
+}
+
+function downloadCircularPdf(id) {
+  const c = circulars.find(x => x.id === id);
+  if (!c) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const navy = [13, 30, 58], gold = [201, 164, 74], white = [255, 255, 255], ink = [30, 40, 60];
+  const PW = 210;
+
+  // Header
+  doc.setFillColor(...navy);
+  doc.rect(0, 0, PW, 38, 'F');
+  doc.setFillColor(...gold);
+  doc.rect(0, 36, PW, 2, 'F');
+  doc.setTextColor(...gold);
+  doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+  doc.text('Jewel Model Primary School', PW / 2, 14, { align: 'center' });
+  doc.setTextColor(...white);
+  doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+  doc.text('Official Circular', PW / 2, 22, { align: 'center' });
+  doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+  doc.text(c.title, PW / 2, 30, { align: 'center' });
+
+  // Meta
+  const date = new Date(c.created_at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  doc.setTextColor(...ink);
+  doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+  doc.text(`Author: ${c.author}   |   Date: ${date}`, 14, 48);
+
+  // Body
+  doc.setFontSize(11); doc.setFont('helvetica', 'normal');
+  const lines = doc.splitTextToSize(c.body, PW - 28);
+  doc.text(lines, 14, 58);
+
+  // Footer
+  doc.setFillColor(...navy);
+  doc.rect(0, 287, PW, 10, 'F');
+  doc.setTextColor(...gold);
+  doc.setFontSize(7);
+  doc.text('Jewel Model Primary School · JMS-N', PW / 2, 293, { align: 'center' });
+
+  doc.save(`${c.title.replace(/\s+/g, '_')}_Circular.pdf`);
+  toast('📄 PDF downloaded');
+}
+
+// ── ONLINE/OFFLINE ────────────────────────────────────────────────────────────
+window.addEventListener('online', showOnlineBanner);
+window.addEventListener('offline', showOfflineBanner);
+
+function showOfflineBanner() {
+  let b = document.getElementById('offlineBanner');
+  if (!b) { b = document.createElement('div'); b.id = 'offlineBanner'; b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999;padding:10px;font-size:12px;font-weight:700;text-align:center;background:#b52b2b;color:#fff;'; document.body.appendChild(b); }
+  b.textContent = '📵 Offline — changes will sync when reconnected';
+  b.style.display = 'block';
+}
+
+function showOnlineBanner() {
+  const b = document.getElementById('offlineBanner');
+  if (b) { b.style.background = '#1a6e3c'; b.textContent = '✅ Back online'; setTimeout(() => b.style.display = 'none', 2500); }
+}
+
+</script>
+</body>
+</html>
