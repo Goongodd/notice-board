@@ -43,30 +43,11 @@ async function checkSession() {
   if (session) {
     currentUser = session.user;
     await loadUserRole();
-    hideLoading();
     showApp();
   } else {
     hideLoading();
-    showWelcome();
+    showAuthScreen();
   }
-}
-
-function showWelcome() {
-  document.getElementById('welcomeScreen').classList.remove('hidden');
-  document.getElementById('authScreen').classList.add('hidden');
-  document.getElementById('app').classList.add('hidden');
-}
-
-function showStaffLogin() {
-  document.getElementById('welcomeScreen').classList.add('hidden');
-  document.getElementById('authScreen').classList.remove('hidden');
-}
-
-function enterAsPublic() {
-  currentRole = 'public';
-  currentUser = null;
-  document.getElementById('welcomeScreen').classList.add('hidden');
-  showApp();
 }
 
 function hideLoading() {
@@ -81,22 +62,16 @@ function showAuthScreen() {
 
 function showApp() {
   document.getElementById('authScreen').classList.add('hidden');
-  document.getElementById('welcomeScreen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
+  document.getElementById('headerRole').textContent = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : '';
+  // Show/hide staff-only buttons
   const isStaff = currentRole === 'admin' || currentRole === 'teacher';
-  const roleLabel = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : 'Parent';
-  document.getElementById('headerRole').textContent = roleLabel;
   document.getElementById('addNoticeBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('addCircularBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('viewFeedbackBtn').style.display = isStaff ? 'block' : 'none';
-  document.getElementById('headerStaffLogin').style.display = isStaff ? 'none' : 'block';
-  document.getElementById('headerSignout').style.display = isStaff ? 'block' : 'none';
+  hideLoading();
   loadNotices();
   loadCirculars();
-}
-
-function showAuthScreen() {
-  document.getElementById('authScreen').classList.remove('hidden');
 }
 
 async function loadUserRole() {
@@ -133,7 +108,17 @@ async function signOut() {
   }
   currentUser = null;
   currentRole = 'public';
+  // Reset all staff UI to clean state
   document.getElementById('app').classList.add('hidden');
+  const staffBtns = ['addNoticeBtn', 'addCircularBtn', 'viewFeedbackBtn'];
+  staffBtns.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
+  const staffEl = document.getElementById('feedbackStaff');
+  const pubEl = document.getElementById('feedbackPublic');
+  if (staffEl) staffEl.classList.add('hidden');
+  if (pubEl) pubEl.classList.remove('hidden');
+  document.getElementById('headerRole').textContent = '';
+  if (document.getElementById('headerStaffLogin')) document.getElementById('headerStaffLogin').style.display = 'none';
+  if (document.getElementById('headerSignout')) document.getElementById('headerSignout').style.display = 'none';
   showWelcome();
 }
 
@@ -305,7 +290,7 @@ function toggleFeedbackView() {
   const isShowing = staff.style.display !== 'none';
   staff.style.display = isShowing ? 'none' : 'block';
   pub.style.display = isShowing ? 'block' : 'none';
-  btn.textContent = isShowing ? 'View Inbox' : 'Close Inbox';
+  btn.textContent = isShowing ? 'View Inbox' : 'Submit Form';
   if (!isShowing) loadFeedback();
 }
 
@@ -358,9 +343,18 @@ async function checkFeedbackReply() {
     el.innerHTML = '<div class="fb-ref-badge">No feedback found with that reference number.</div>';
     return;
   }
-  el.innerHTML = data.reply
-    ? `<div class="fb-ref-badge">✅ Reply received:<br/><strong>${data.reply}</strong></div>`
-    : `<div class="fb-ref-badge">⏳ No reply yet. Please check back later.</div>`;
+  const date = new Date(data.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  el.innerHTML = `
+    <div class="fb-ref-badge">
+      <div class="fb-ref-original">
+        <div class="fb-ref-label">📝 Your message <span class="fb-ref-date">${date}</span></div>
+        <div class="fb-ref-message">${data.message}</div>
+      </div>
+      ${data.reply
+        ? `<div class="fb-ref-reply"><div class="fb-ref-label">✅ School's reply</div><div class="fb-ref-message">${data.reply}</div></div>`
+        : `<div class="fb-ref-pending">⏳ No reply yet. Please check back later.</div>`
+      }
+    </div>`;
 }
 
 function openFeedbackReply(id) {

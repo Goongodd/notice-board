@@ -180,3 +180,10 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
 
 /* Button press feel */
 .ripple:active{transform:scale(0.97);transition:transform .1s ease;}
+/* ── FEEDBACK REFERENCE LOOKUP ── */
+.fb-ref-original{background:rgba(255,255,255,.05);border-radius:10px;padding:12px;margin-bottom:10px;}
+.fb-ref-reply{background:rgba(201,164,74,.08);border:1px solid rgba(201,164,74,.2);border-radius:10px;padding:12px;}
+.fb-ref-pending{color:rgba(255,255,255,.4);font-size:var(--fs-xs);text-align:center;padding:8px 0;}
+.fb-ref-label{font-size:var(--fs-xs);font-weight:700;color:var(--gold);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.fb-ref-date{font-weight:400;color:rgba(255,255,255,.3);}
+.fb-ref-message{font-size:var(--fs-sm);color:rgba(255,255,255,.85);line-height:1.5;}
