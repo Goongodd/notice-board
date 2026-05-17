@@ -90,7 +90,7 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
 .fb-textarea{width:100%;border:1.5px solid var(--cream);border-radius:8px;padding:10px 12px;font-size:var(--fs-sm);color:var(--ink);background:var(--bg);margin-bottom:10px;font-family:'Outfit',sans-serif;resize:none;}
 .fb-submit-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:12px;font-size:var(--fs-sm);font-weight:700;cursor:pointer;}
 .fb-check-btn{width:100%;background:var(--bg);color:var(--navy);border:1.5px solid var(--cream);border-radius:10px;padding:12px;font-size:var(--fs-sm);font-weight:700;cursor:pointer;margin-top:4px;}
-.fb-ref-badge{background:rgba(13,30,58,.06);border-radius:8px;padding:10px 14px;margin-top:10px;font-size:var(--fs-xs);color:var(--navy);}
+.fb-ref-badge{background:rgba(13,30,58,.6);border-radius:12px;padding:14px;margin-top:10px;font-size:var(--fs-xs);color:#fff;border:1px solid rgba(255,255,255,.08);}
 .fb-ref-num{font-weight:700;font-size:var(--fs-sm);color:var(--navy);}
 /* Staff feedback list */
 .feedback-item{background:var(--white);margin:8px 16px;border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);}
@@ -181,9 +181,9 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
 /* Button press feel */
 .ripple:active{transform:scale(0.97);transition:transform .1s ease;}
 /* ── FEEDBACK REFERENCE LOOKUP ── */
-.fb-ref-original{background:rgba(255,255,255,.05);border-radius:10px;padding:12px;margin-bottom:10px;}
-.fb-ref-reply{background:rgba(201,164,74,.08);border:1px solid rgba(201,164,74,.2);border-radius:10px;padding:12px;}
+.fb-ref-original{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;margin-bottom:10px;}
+.fb-ref-reply{background:rgba(201,164,74,.15);border:1px solid rgba(201,164,74,.35);border-radius:10px;padding:12px;}
 .fb-ref-pending{color:rgba(255,255,255,.4);font-size:var(--fs-xs);text-align:center;padding:8px 0;}
 .fb-ref-label{font-size:var(--fs-xs);font-weight:700;color:var(--gold);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
-.fb-ref-date{font-weight:400;color:rgba(255,255,255,.3);}
-.fb-ref-message{font-size:var(--fs-sm);color:rgba(255,255,255,.85);line-height:1.5;}
+.fb-ref-date{font-weight:400;color:rgba(255,255,255,.5);}
+.fb-ref-message{font-size:var(--fs-sm);color:#fff;line-height:1.5;font-weight:400;}
