@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="theme-color" content="#0d1e3a"/>
+<title>JMS-N · Jewel Model School Notice</title>
+<link id="pwa-manifest" rel="manifest" href=""/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading" id="loading">
+  <div class="loading-logo">JMS-N</div>
+  <div class="loading-sub">Jewel Model School Notice</div>
+  <div class="spinner"></div>
+</div>
+
+<!-- AUTH SCREEN -->
+<div class="auth-screen hidden" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">JMS-N</div>
+    <div class="auth-sub">Staff Portal</div>
+    <div id="authError" class="auth-error hidden"></div>
+    <input type="email" id="authEmail" placeholder="Email address" class="auth-input"/>
+    <input type="password" id="authPassword" placeholder="Password" class="auth-input"/>
+    <button class="auth-btn" onclick="signIn()">Sign In</button>
+    <button class="auth-link" onclick="showForgotPassword()">Forgot password?</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app hidden" id="app">
+
+  <!-- HEADER -->
+  <header class="header" id="mainHeader">
+    <div class="header-left">
+      <div class="header-logo">JMS-N</div>
+      <div class="header-school">Jewel Model Primary School</div>
+    </div>
+    <div class="header-right">
+      <span class="header-role" id="headerRole"></span>
+      <button class="header-signout" onclick="signOut()">↩</button>
+    </div>
+  </header>
+
+  <!-- VIEWS -->
+  <div class="views-wrap" id="viewsWrap">
+
+    <!-- NOTICEBOARD -->
+    <div class="view on" id="vNotices">
+      <div class="view-toolbar" id="noticeToolbar">
+        <div class="toolbar-title">📢 Noticeboard</div>
+        <button class="toolbar-btn" id="addNoticeBtn" onclick="openNoticeModal()">+ Post</button>
+      </div>
+      <div class="category-tabs" id="categoryTabs">
+        <button class="cat-tab active" onclick="filterNotices('All',this)">All</button>
+        <button class="cat-tab" onclick="filterNotices('General',this)">General</button>
+        <button class="cat-tab" onclick="filterNotices('Urgent',this)">Urgent</button>
+        <button class="cat-tab" onclick="filterNotices('Academic',this)">Academic</button>
+        <button class="cat-tab" onclick="filterNotices('Events',this)">Events</button>
+      </div>
+      <div class="notices-list" id="noticesList"></div>
+    </div>
+
+    <!-- FEEDBACK -->
+    <div class="view" id="vFeedback">
+      <div class="view-toolbar">
+        <div class="toolbar-title">📬 Feedback</div>
+        <button class="toolbar-btn" id="viewFeedbackBtn" onclick="toggleFeedbackView()">My Submissions</button>
+      </div>
+      <!-- Public submission form -->
+      <div id="feedbackPublic">
+        <div class="feedback-form-card">
+          <div class="feedback-form-title">Share your thoughts</div>
+          <p class="feedback-form-sub">Your feedback helps us improve. Name is optional.</p>
+          <input type="text" id="fbName" placeholder="Your name (optional)" class="fb-input"/>
+          <textarea id="fbMessage" placeholder="Write your feedback or complaint here..." class="fb-textarea" rows="5"></textarea>
+          <button class="fb-submit-btn" onclick="submitFeedback()">Submit Feedback</button>
+        </div>
+        <div class="feedback-check-card">
+          <div class="feedback-form-title">Check a reply</div>
+          <p class="feedback-form-sub">Enter your reference number to see if we've replied.</p>
+          <input type="text" id="fbRef" placeholder="Reference number e.g. FB-1234" class="fb-input"/>
+          <button class="fb-check-btn" onclick="checkFeedbackReply()">Check Reply</button>
+          <div id="fbReplyResult"></div>
+        </div>
+      </div>
+      <!-- Staff view -->
+      <div id="feedbackStaff" style="display:none;">
+        <div id="feedbackList"></div>
+      </div>
+    </div>
+
+    <!-- CIRCULARS -->
+    <div class="view" id="vCirculars">
+      <div class="view-toolbar">
+        <div class="toolbar-title">📄 Circulars</div>
+        <button class="toolbar-btn" id="addCircularBtn" onclick="openCircularModal()">+ New</button>
+      </div>
+      <!-- Public ack form -->
+      <div id="circularPublic">
+        <div class="circular-ack-banner">
+          <div class="cab-text">Tap a circular below to read and acknowledge receipt.</div>
+        </div>
+      </div>
+      <div class="circulars-list" id="circularsList"></div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="bb active" id="bb0" onclick="switchView(0)"><span class="bi">📢</span>Notices</button>
+    <button class="bb" id="bb1" onclick="switchView(1)"><span class="bi">📬</span>Feedback</button>
+    <button class="bb" id="bb2" onclick="switchView(2)"><span class="bi">📄</span>Circulars</button>
+  </nav>
+
+</div>
+
+<!-- MODALS -->
+
+<!-- Post Notice Modal -->
+<div class="modal-overlay hidden" id="noticeModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="noticeModalTitle">Post a Notice</div>
+      <button class="modal-close" onclick="closeNoticeModal()">✕</button>
+    </div>
+    <input type="text" id="noticeTitle" placeholder="Notice title" class="modal-input"/>
+    <select id="noticeCategory" class="modal-input">
+      <option value="General">General</option>
+      <option value="Urgent">Urgent</option>
+      <option value="Academic">Academic</option>
+      <option value="Events">Events</option>
+    </select>
+    <textarea id="noticeBody" placeholder="Write your notice here..." class="modal-textarea" rows="6"></textarea>
+    <div class="modal-sms-row">
+      <label class="modal-sms-label">
+        <input type="checkbox" id="noticeSms" checked/> Notify parents via SMS
+      </label>
+    </div>
+    <button class="modal-submit-btn" onclick="saveNotice()">Post Notice</button>
+  </div>
+</div>
+
+<!-- Notice Detail Modal -->
+<div class="modal-overlay hidden" id="noticeDetailModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="ndTitle"></div>
+      <button class="modal-close" onclick="closeModal('noticeDetailModal')">✕</button>
+    </div>
+    <div class="nd-meta" id="ndMeta"></div>
+    <div class="nd-body" id="ndBody"></div>
+    <div class="nd-actions" id="ndActions"></div>
+  </div>
+</div>
+
+<!-- Feedback Reply Modal -->
+<div class="modal-overlay hidden" id="feedbackReplyModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">Reply to Feedback</div>
+      <button class="modal-close" onclick="closeModal('feedbackReplyModal')">✕</button>
+    </div>
+    <div class="fb-detail" id="fbDetail"></div>
+    <textarea id="fbReplyText" placeholder="Write your reply..." class="modal-textarea" rows="4"></textarea>
+    <button class="modal-submit-btn" onclick="submitFeedbackReply()">Send Reply</button>
+  </div>
+</div>
+
+<!-- Circular Modal -->
+<div class="modal-overlay hidden" id="circularModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">New Circular</div>
+      <button class="modal-close" onclick="closeModal('circularModal')">✕</button>
+    </div>
+    <input type="text" id="circularTitle" placeholder="Circular title" class="modal-input"/>
+    <textarea id="circularBody" placeholder="Write the circular content here..." class="modal-textarea" rows="8"></textarea>
+    <button class="modal-submit-btn" onclick="saveCircular()">Publish Circular</button>
+  </div>
+</div>
+
+<!-- Circular Detail Modal -->
+<div class="modal-overlay hidden" id="circularDetailModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="cdTitle"></div>
+      <button class="modal-close" onclick="closeModal('circularDetailModal')">✕</button>
+    </div>
+    <div class="nd-meta" id="cdMeta"></div>
+    <div class="nd-body" id="cdBody"></div>
+    <div id="cdAckSection"></div>
+    <div class="nd-actions" id="cdActions"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast hidden" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
