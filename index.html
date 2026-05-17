@@ -31,6 +31,7 @@
     <input type="password" id="authPassword" placeholder="Password" class="auth-input"/>
     <button class="auth-btn" onclick="signIn()">Sign In</button>
     <button class="auth-link" onclick="showForgotPassword()">Forgot password?</button>
+    <button class="auth-link" onclick="enterAsPublic()">← Continue as parent / visitor</button>
   </div>
 </div>
 
@@ -45,7 +46,8 @@
     </div>
     <div class="header-right">
       <span class="header-role" id="headerRole"></span>
-      <button class="header-signout" onclick="signOut()">↩</button>
+      <button class="header-staff-login" id="headerStaffLogin" onclick="showAuthScreen()" style="display:none;">Staff Login</button>
+      <button class="header-signout" id="headerSignout" onclick="signOut()" style="display:none;">↩</button>
     </div>
   </header>
 

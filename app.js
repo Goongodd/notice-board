@@ -43,11 +43,17 @@ async function checkSession() {
   if (session) {
     currentUser = session.user;
     await loadUserRole();
-    showApp();
   } else {
-    hideLoading();
-    showAuthScreen();
+    currentRole = 'public';
   }
+  showApp();
+}
+
+function enterAsPublic() {
+  currentRole = 'public';
+  currentUser = null;
+  document.getElementById('authScreen').classList.add('hidden');
+  showApp();
 }
 
 function hideLoading() {
@@ -61,17 +67,22 @@ function showAuthScreen() {
 }
 
 function showApp() {
+  const isStaff = currentRole === 'admin' || currentRole === 'teacher';
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('headerRole').textContent = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : '';
-  // Show/hide staff-only buttons
-  const isStaff = currentRole === 'admin' || currentRole === 'teacher';
   document.getElementById('addNoticeBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('addCircularBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('viewFeedbackBtn').style.display = isStaff ? 'block' : 'none';
+  document.getElementById('headerStaffLogin').style.display = isStaff ? 'none' : 'block';
+  document.getElementById('headerSignout').style.display = isStaff ? 'block' : 'none';
   hideLoading();
   loadNotices();
   loadCirculars();
+}
+
+function showAuthScreen() {
+  document.getElementById('authScreen').classList.remove('hidden');
 }
 
 async function loadUserRole() {
@@ -275,7 +286,7 @@ function toggleFeedbackView() {
   const isShowing = staff.style.display !== 'none';
   staff.style.display = isShowing ? 'none' : 'block';
   pub.style.display = isShowing ? 'block' : 'none';
-  btn.textContent = isShowing ? 'View Inbox' : 'Submit Form';
+  btn.textContent = isShowing ? 'View Inbox' : 'Close Inbox';
   if (!isShowing) loadFeedback();
 }
 
