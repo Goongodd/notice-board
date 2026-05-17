@@ -43,11 +43,30 @@ async function checkSession() {
   if (session) {
     currentUser = session.user;
     await loadUserRole();
+    hideLoading();
     showApp();
   } else {
     hideLoading();
-    showAuthScreen();
+    showWelcome();
   }
+}
+
+function showWelcome() {
+  document.getElementById('welcomeScreen').classList.remove('hidden');
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('app').classList.add('hidden');
+}
+
+function showStaffLogin() {
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  document.getElementById('authScreen').classList.remove('hidden');
+}
+
+function enterAsPublic() {
+  currentRole = 'public';
+  currentUser = null;
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  showApp();
 }
 
 function hideLoading() {
@@ -62,16 +81,22 @@ function showAuthScreen() {
 
 function showApp() {
   document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('welcomeScreen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
-  document.getElementById('headerRole').textContent = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : '';
-  // Show/hide staff-only buttons
   const isStaff = currentRole === 'admin' || currentRole === 'teacher';
+  const roleLabel = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : 'Parent';
+  document.getElementById('headerRole').textContent = roleLabel;
   document.getElementById('addNoticeBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('addCircularBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('viewFeedbackBtn').style.display = isStaff ? 'block' : 'none';
-  hideLoading();
+  document.getElementById('headerStaffLogin').style.display = isStaff ? 'none' : 'block';
+  document.getElementById('headerSignout').style.display = isStaff ? 'block' : 'none';
   loadNotices();
   loadCirculars();
+}
+
+function showAuthScreen() {
+  document.getElementById('authScreen').classList.remove('hidden');
 }
 
 async function loadUserRole() {
@@ -103,8 +128,13 @@ function showAuthError(msg) {
 }
 
 async function signOut() {
-  await sb.auth.signOut();
-  location.reload();
+  if (currentRole !== 'public') {
+    await sb.auth.signOut();
+  }
+  currentUser = null;
+  currentRole = 'public';
+  document.getElementById('app').classList.add('hidden');
+  showWelcome();
 }
 
 function showForgotPassword() {
@@ -275,7 +305,7 @@ function toggleFeedbackView() {
   const isShowing = staff.style.display !== 'none';
   staff.style.display = isShowing ? 'none' : 'block';
   pub.style.display = isShowing ? 'block' : 'none';
-  btn.textContent = isShowing ? 'View Inbox' : 'Submit Form';
+  btn.textContent = isShowing ? 'View Inbox' : 'Close Inbox';
   if (!isShowing) loadFeedback();
 }
 
