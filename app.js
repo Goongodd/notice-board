@@ -43,30 +43,11 @@ async function checkSession() {
   if (session) {
     currentUser = session.user;
     await loadUserRole();
-    hideLoading();
     showApp();
   } else {
     hideLoading();
-    showWelcome();
+    showAuthScreen();
   }
-}
-
-function showWelcome() {
-  document.getElementById('welcomeScreen').classList.remove('hidden');
-  document.getElementById('authScreen').classList.add('hidden');
-  document.getElementById('app').classList.add('hidden');
-}
-
-function showStaffLogin() {
-  document.getElementById('welcomeScreen').classList.add('hidden');
-  document.getElementById('authScreen').classList.remove('hidden');
-}
-
-function enterAsPublic() {
-  currentRole = 'public';
-  currentUser = null;
-  document.getElementById('welcomeScreen').classList.add('hidden');
-  showApp();
 }
 
 function hideLoading() {
@@ -81,14 +62,14 @@ function showAuthScreen() {
 
 function showApp() {
   document.getElementById('authScreen').classList.add('hidden');
-  document.getElementById('welcomeScreen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
+  document.getElementById('headerRole').textContent = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : '';
+  // Show/hide staff-only buttons
   const isStaff = currentRole === 'admin' || currentRole === 'teacher';
-  const roleLabel = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : 'Parent';
-  document.getElementById('headerRole').textContent = roleLabel;
   document.getElementById('addNoticeBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('addCircularBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('viewFeedbackBtn').style.display = isStaff ? 'block' : 'none';
+  hideLoading();
   loadNotices();
   loadCirculars();
 }
@@ -122,13 +103,8 @@ function showAuthError(msg) {
 }
 
 async function signOut() {
-  if (currentRole !== 'public') {
-    await sb.auth.signOut();
-  }
-  currentUser = null;
-  currentRole = 'public';
-  document.getElementById('app').classList.add('hidden');
-  showWelcome();
+  await sb.auth.signOut();
+  location.reload();
 }
 
 function showForgotPassword() {
@@ -299,7 +275,7 @@ function toggleFeedbackView() {
   const isShowing = staff.style.display !== 'none';
   staff.style.display = isShowing ? 'none' : 'block';
   pub.style.display = isShowing ? 'block' : 'none';
-  btn.textContent = isShowing ? 'View Inbox' : 'Close Inbox';
+  btn.textContent = isShowing ? 'View Inbox' : 'Submit Form';
   if (!isShowing) loadFeedback();
 }
 
@@ -344,8 +320,9 @@ async function submitFeedback() {
 async function checkFeedbackReply() {
   const ref = document.getElementById('fbRef').value.trim().toUpperCase();
   if (!ref.startsWith('FB-')) { toast('Invalid reference number'); return; }
-  const id = ref.replace('FB-', '').toLowerCase();
-  const { data } = await sb.from('feedback').select('*').ilike('id', id + '%').single();
+  const code = ref.replace('FB-', '').toLowerCase();
+  const { data: allData } = await sb.from('feedback').select('*');
+  const data = allData ? allData.find(f => f.id.slice(0, 4).toLowerCase() === code) : null;
   const el = document.getElementById('fbReplyResult');
   if (!data) {
     el.innerHTML = '<div class="fb-ref-badge">No feedback found with that reference number.</div>';
