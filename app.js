@@ -43,11 +43,30 @@ async function checkSession() {
   if (session) {
     currentUser = session.user;
     await loadUserRole();
+    hideLoading();
     showApp();
   } else {
     hideLoading();
-    showAuthScreen();
+    showWelcome();
   }
+}
+
+function showWelcome() {
+  document.getElementById('welcomeScreen').classList.remove('hidden');
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('app').classList.add('hidden');
+}
+
+function showStaffLogin() {
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  document.getElementById('authScreen').classList.remove('hidden');
+}
+
+function enterAsPublic() {
+  currentRole = 'public';
+  currentUser = null;
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  showApp();
 }
 
 function hideLoading() {
@@ -62,14 +81,18 @@ function showAuthScreen() {
 
 function showApp() {
   document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('welcomeScreen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
-  document.getElementById('headerRole').textContent = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : '';
-  // Show/hide staff-only buttons
   const isStaff = currentRole === 'admin' || currentRole === 'teacher';
+  const roleLabel = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : 'Parent';
+  document.getElementById('headerRole').textContent = roleLabel;
   document.getElementById('addNoticeBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('addCircularBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('viewFeedbackBtn').style.display = isStaff ? 'block' : 'none';
-  hideLoading();
+  const staffLoginBtn = document.getElementById('headerStaffLogin');
+  const signoutBtn = document.getElementById('headerSignout');
+  if (staffLoginBtn) staffLoginBtn.style.display = isStaff ? 'none' : 'block';
+  if (signoutBtn) signoutBtn.style.display = isStaff ? 'block' : 'none';
   loadNotices();
   loadCirculars();
 }
@@ -108,17 +131,18 @@ async function signOut() {
   }
   currentUser = null;
   currentRole = 'public';
-  // Reset all staff UI to clean state
   document.getElementById('app').classList.add('hidden');
-  const staffBtns = ['addNoticeBtn', 'addCircularBtn', 'viewFeedbackBtn'];
-  staffBtns.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
-  const staffEl = document.getElementById('feedbackStaff');
+  ['addNoticeBtn','addCircularBtn','viewFeedbackBtn'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.style.display = 'none';
+  });
   const pubEl = document.getElementById('feedbackPublic');
   if (staffEl) staffEl.classList.add('hidden');
   if (pubEl) pubEl.classList.remove('hidden');
   document.getElementById('headerRole').textContent = '';
-  if (document.getElementById('headerStaffLogin')) document.getElementById('headerStaffLogin').style.display = 'none';
-  if (document.getElementById('headerSignout')) document.getElementById('headerSignout').style.display = 'none';
+  const staffLoginBtn = document.getElementById('headerStaffLogin');
+  const signoutBtn = document.getElementById('headerSignout');
+  if (staffLoginBtn) staffLoginBtn.style.display = 'none';
+  if (signoutBtn) signoutBtn.style.display = 'none';
   showWelcome();
 }
 
