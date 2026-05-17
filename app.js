@@ -43,16 +43,29 @@ async function checkSession() {
   if (session) {
     currentUser = session.user;
     await loadUserRole();
+    hideLoading();
+    showApp();
   } else {
-    currentRole = 'public';
+    hideLoading();
+    showWelcome();
   }
-  showApp();
+}
+
+function showWelcome() {
+  document.getElementById('welcomeScreen').classList.remove('hidden');
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('app').classList.add('hidden');
+}
+
+function showStaffLogin() {
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  document.getElementById('authScreen').classList.remove('hidden');
 }
 
 function enterAsPublic() {
   currentRole = 'public';
   currentUser = null;
-  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('welcomeScreen').classList.add('hidden');
   showApp();
 }
 
@@ -67,22 +80,17 @@ function showAuthScreen() {
 }
 
 function showApp() {
-  const isStaff = currentRole === 'admin' || currentRole === 'teacher';
   document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('welcomeScreen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
-  document.getElementById('headerRole').textContent = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : '';
+  const isStaff = currentRole === 'admin' || currentRole === 'teacher';
+  const roleLabel = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : 'Parent';
+  document.getElementById('headerRole').textContent = roleLabel;
   document.getElementById('addNoticeBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('addCircularBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('viewFeedbackBtn').style.display = isStaff ? 'block' : 'none';
-  document.getElementById('headerStaffLogin').style.display = isStaff ? 'none' : 'block';
-  document.getElementById('headerSignout').style.display = isStaff ? 'block' : 'none';
-  hideLoading();
   loadNotices();
   loadCirculars();
-}
-
-function showAuthScreen() {
-  document.getElementById('authScreen').classList.remove('hidden');
 }
 
 async function loadUserRole() {
@@ -114,8 +122,13 @@ function showAuthError(msg) {
 }
 
 async function signOut() {
-  await sb.auth.signOut();
-  location.reload();
+  if (currentRole !== 'public') {
+    await sb.auth.signOut();
+  }
+  currentUser = null;
+  currentRole = 'public';
+  document.getElementById('app').classList.add('hidden');
+  showWelcome();
 }
 
 function showForgotPassword() {

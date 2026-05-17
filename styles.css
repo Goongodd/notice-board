@@ -148,4 +148,35 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
 
 /* ── UTILITIES ── */
 .hidden{display:none!important;}
-.header-staff-login{background:rgba(201,164,74,.15);border:1px solid rgba(201,164,74,.3);color:var(--gold);font-size:var(--fs-xs);font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:'Outfit',sans-serif;}
+
+/* ── WELCOME SCREEN ── */
+.welcome-screen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:99;padding:24px;}
+.welcome-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 20%, rgba(201,164,74,.12) 0%, transparent 60%),radial-gradient(ellipse at 80% 80%, rgba(201,164,74,.08) 0%, transparent 60%);pointer-events:none;}
+.welcome-content{position:relative;width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center;}
+.welcome-logo{font-family:'Playfair Display',serif;font-size:56px;font-weight:900;letter-spacing:8px;color:var(--gold);filter:drop-shadow(0 0 30px rgba(201,164,74,.35));margin-bottom:8px;}
+.welcome-school{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:center;margin-bottom:6px;}
+.welcome-tagline{font-size:var(--fs-xs);color:rgba(201,164,74,.5);text-align:center;margin-bottom:48px;letter-spacing:1px;}
+.welcome-buttons{width:100%;display:flex;flex-direction:column;gap:14px;}
+.welcome-parent-btn{width:100%;background:var(--gold);border:none;border-radius:16px;padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;position:relative;overflow:hidden;}
+.welcome-staff-btn{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:16px;padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;position:relative;overflow:hidden;}
+.welcome-btn-icon{font-size:28px;flex-shrink:0;}
+.welcome-btn-text{flex:1;}
+.welcome-parent-btn .welcome-btn-title{font-size:var(--fs-md);font-weight:700;color:var(--navy);}
+.welcome-parent-btn .welcome-btn-sub{font-size:var(--fs-xs);color:rgba(13,30,58,.6);margin-top:2px;}
+.welcome-staff-btn .welcome-btn-title{font-size:var(--fs-md);font-weight:700;color:#fff;}
+.welcome-staff-btn .welcome-btn-sub{font-size:var(--fs-xs);color:rgba(255,255,255,.4);margin-top:2px;}
+.welcome-btn-arrow{font-size:18px;flex-shrink:0;}
+.welcome-parent-btn .welcome-btn-arrow{color:var(--navy);}
+.welcome-staff-btn .welcome-btn-arrow{color:rgba(255,255,255,.4);}
+
+/* ── AUTH BACK BUTTON ── */
+.auth-back-btn{background:none;border:none;color:rgba(255,255,255,.4);font-size:var(--fs-xs);cursor:pointer;margin-bottom:16px;padding:4px 0;display:block;font-family:'Outfit',sans-serif;}
+
+/* ── RIPPLE EFFECT ── */
+.ripple{position:relative;overflow:hidden;}
+.ripple::after{content:'';position:absolute;border-radius:50%;background:rgba(255,255,255,.25);transform:scale(0);animation:none;pointer-events:none;}
+.ripple:active::after{width:200px;height:200px;margin-top:-100px;margin-left:-100px;top:50%;left:50%;animation:ripple-anim .4s ease-out;}
+@keyframes ripple-anim{to{transform:scale(2.5);opacity:0;}}
+
+/* Button press feel */
+.ripple:active{transform:scale(0.97);transition:transform .1s ease;}
