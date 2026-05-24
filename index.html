@@ -92,13 +92,15 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
 .view.on{display:flex;}
 
 /* ── HOME DASHBOARD ── */
-.home-view{padding:20px 16px;display:flex;flex-direction:column;gap:14px;}
+.home-view{padding:12px 14px;display:flex;flex-direction:column;gap:10px;height:100%;box-sizing:border-box;}
+.home-tiles-grid{display:flex;flex-direction:column;gap:10px;flex:1;}
+.home-tile{flex:1;}
 .home-greeting{margin-bottom:4px;}
 .home-greeting-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--navy);}
 .home-greeting-sub{font-size:12px;color:var(--muted);margin-top:4px;}
 
 /* Big tile cards */
-.home-tile{border-radius:20px;padding:24px;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s;min-height:140px;display:flex;flex-direction:column;justify-content:space-between;}
+.home-tile{border-radius:20px;padding:28px;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s;min-height:180px;display:flex;flex-direction:column;justify-content:space-between;}
 .home-tile:active{transform:scale(0.97);}
 .home-tile-icon{font-size:36px;margin-bottom:12px;}
 .home-tile-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px;}
@@ -242,6 +244,12 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
   </div>
   <div class="welcome-buttons">
     <button class="welcome-parent-btn ripple" onclick="enterAsPublic()">
+      <svg style="position:absolute;right:-10px;bottom:-10px;opacity:.12;width:130px;height:130px;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="35" cy="28" r="14" fill="#0d1e3a"/>
+        <ellipse cx="35" cy="65" rx="22" ry="18" fill="#0d1e3a"/>
+        <circle cx="68" cy="32" r="11" fill="#0d1e3a"/>
+        <ellipse cx="68" cy="64" rx="17" ry="15" fill="#0d1e3a"/>
+      </svg>
       <div class="btn-left">
         <span class="btn-icon">👨‍👩‍👧</span>
         <div>
@@ -252,6 +260,14 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
       <span class="btn-arrow">→</span>
     </button>
     <button class="welcome-staff-btn ripple" onclick="showStaffLogin()">
+      <svg style="position:absolute;right:-10px;bottom:-10px;opacity:.10;width:120px;height:120px;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="10" width="60" height="50" rx="4" fill="white"/>
+        <rect x="30" y="22" width="40" height="4" rx="2" fill="#0d1e3a"/>
+        <rect x="30" y="32" width="30" height="4" rx="2" fill="#0d1e3a"/>
+        <rect x="30" y="42" width="20" height="4" rx="2" fill="#0d1e3a"/>
+        <circle cx="50" cy="75" r="12" fill="white"/>
+        <rect x="30" y="85" width="40" height="12" rx="4" fill="white"/>
+      </svg>
       <div class="btn-left">
         <span class="btn-icon">🏫</span>
         <div>
@@ -291,6 +307,7 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
     <div class="app-header-right">
       <span class="role-badge" id="headerRole"></span>
       <button class="signout-btn" id="signoutBtn" onclick="signOut()" style="display:none;">Sign Out</button>
+      <button class="signout-btn" id="parentSignoutBtn" onclick="parentSignOut()" style="display:none;background:rgba(201,164,74,.15);color:var(--gold);">Exit</button>
     </div>
   </header>
 
@@ -339,7 +356,7 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
         </div>
       </div>
       <!-- Staff feedback inbox -->
-      <div id="feedbackStaffView" style="display:none;">
+      <div id="feedbackStaffView" style="display:none;padding-top:12px;">
         <div class="fb-toggle-row">
           <button class="fb-toggle-btn active" id="fbTabInbox" onclick="switchFbTab('inbox')">📬 Inbox</button>
           <button class="fb-toggle-btn" id="fbTabForm" onclick="switchFbTab('form')">📝 Submit Form</button>
@@ -396,11 +413,8 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
       <option value="Events">Events</option>
     </select>
     <textarea id="noticeBody" placeholder="Write your notice here..." class="modal-textarea" rows="6"></textarea>
-    <div class="modal-sms-row">
-      <label class="modal-sms-label">
-        <input type="checkbox" id="noticeSms" checked/> Notify parents via SMS
-      </label>
-    </div>
+    <button type="button" class="modal-submit-btn ripple" onclick="openSmsRecipients()" style="background:var(--bg);color:var(--navy);border:1.5px solid var(--cream);margin-bottom:10px;">📱 Choose SMS Recipients</button>
+    <div id="smsRecipientsList" style="max-height:180px;overflow-y:auto;margin-bottom:10px;display:none;"></div>
     <button class="modal-submit-btn ripple" onclick="saveNotice()">Post Notice</button>
   </div>
 </div>
@@ -490,7 +504,20 @@ const manifest = {
 document.getElementById('pwa-manifest').href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/json' }));
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', async () => { await checkSession(); });
+window.addEventListener('DOMContentLoaded', async () => {
+  await checkSession();
+  // Push initial state
+  history.pushState({ section: null }, '');
+});
+
+window.addEventListener('popstate', (e) => {
+  if (currentSection) {
+    goHome();
+    history.pushState({ section: null }, '');
+  } else {
+    history.pushState({ section: null }, '');
+  }
+});
 
 async function checkSession() {
   const { data: { session } } = await sb.auth.getSession();
@@ -537,6 +564,7 @@ function showApp() {
   const roleLabel = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : 'Parent';
   document.getElementById('headerRole').textContent = roleLabel;
   document.getElementById('signoutBtn').style.display = isStaff ? 'block' : 'none';
+  document.getElementById('parentSignoutBtn').style.display = isStaff ? 'none' : 'block';
   renderHomeTiles();
   loadNotices();
   loadCirculars();
@@ -568,6 +596,13 @@ function showAuthError(msg) {
   el.classList.remove('hidden');
 }
 
+function parentSignOut() {
+  currentRole = 'public';
+  currentUser = null;
+  document.getElementById('app').classList.add('hidden');
+  showWelcome();
+}
+
 async function signOut() {
   await sb.auth.signOut();
   currentUser = null;
@@ -591,44 +626,59 @@ function renderHomeTiles() {
     : `<div class="home-greeting"><div class="home-greeting-title">Welcome, Parent 👋</div><div class="home-greeting-sub">Jewel Model Primary School</div></div>`;
 
   const noticeTile = `
-    <div class="home-tile tile-notices ripple" onclick="openSection('notices')">
+    <div class="home-tile tile-notices ripple" onclick="openSection('notices')" style="flex:1;">
+      <svg style="position:absolute;right:-10px;bottom:-10px;opacity:.10;width:130px;height:130px;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="15,35 15,65 35,65 70,85 70,15 35,35" fill="white"/>
+        <rect x="15" y="35" width="20" height="30" rx="3" fill="white"/>
+        <path d="M75 38 Q88 50 75 62" stroke="white" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <path d="M78 28 Q98 50 78 72" stroke="white" stroke-width="4" stroke-linecap="round" fill="none" opacity=".5"/>
+      </svg>
       <div>
         <div class="home-tile-icon">📢</div>
         <div class="home-tile-title">Noticeboard</div>
-        <div class="home-tile-desc">${isStaff ? 'Post and manage school notices for parents' : 'Stay up to date with the latest school notices'}</div>
+        <div class="home-tile-desc">${isStaff ? 'Post, manage and categorise school notices. Send SMS alerts to parents instantly.' : 'Read the latest announcements, updates and urgent messages from the school.'}</div>
       </div>
       <span class="home-tile-arrow">→</span>
     </div>`;
 
   const feedbackTile = isStaff
-    ? `<div class="home-tile tile-feedback-staff ripple" onclick="openSection('feedback')">
+    ? `<div class="home-tile tile-feedback-staff ripple" onclick="openSection('feedback')" style="flex:1;">
         <div>
           <div class="home-tile-icon">📬</div>
           <div class="home-tile-title">Feedback Inbox</div>
-          <div class="home-tile-desc">Read and reply to parent feedback and complaints</div>
+          <div class="home-tile-desc">Read, manage and reply to parent feedback and complaints. Every message is tracked with a reference number.</div>
         </div>
         <span class="home-tile-arrow">→</span>
       </div>`
-    : `<div class="home-tile tile-feedback-parent ripple" onclick="openSection('feedback')">
+    : `<div class="home-tile tile-feedback-parent ripple" onclick="openSection('feedback')" style="flex:1;">
         <div>
           <div class="home-tile-icon">💬</div>
           <div class="home-tile-title">Send Feedback</div>
-          <div class="home-tile-desc">Share your thoughts with the school privately and securely</div>
+          <div class="home-tile-desc">Share your thoughts, concerns or suggestions with the school privately. Get a reference number to track replies.</div>
         </div>
         <span class="home-tile-arrow">→</span>
       </div>`;
 
   const circularTile = `
-    <div class="home-tile tile-circulars ripple" onclick="openSection('circulars')">
+    <div class="home-tile tile-circulars ripple" onclick="openSection('circulars')" style="flex:1;">
+      <svg style="position:absolute;right:-10px;bottom:-10px;opacity:.10;width:130px;height:130px;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="18" y="8" width="64" height="84" rx="6" fill="#1a2e4a"/>
+        <rect x="28" y="24" width="44" height="5" rx="2.5" fill="white"/>
+        <rect x="28" y="36" width="44" height="5" rx="2.5" fill="white"/>
+        <rect x="28" y="48" width="34" height="5" rx="2.5" fill="white"/>
+        <rect x="28" y="60" width="38" height="5" rx="2.5" fill="white"/>
+        <rect x="28" y="72" width="24" height="5" rx="2.5" fill="white"/>
+        <path d="M58 8 L82 8 L82 28 Z" fill="white" opacity=".3"/>
+      </svg>
       <div>
         <div class="home-tile-icon">📄</div>
         <div class="home-tile-title">Circulars</div>
-        <div class="home-tile-desc">${isStaff ? 'Publish official circulars and track acknowledgements' : 'Read and acknowledge official school letters'}</div>
+        <div class="home-tile-desc">${isStaff ? 'Publish official letters and circulars. Track which parents have acknowledged receipt.' : 'Read and acknowledge official letters from the school. Download PDFs for your records.'}</div>
       </div>
       <span class="home-tile-arrow">→</span>
     </div>`;
 
-  container.innerHTML = greeting + noticeTile + feedbackTile + circularTile;
+  container.innerHTML = greeting + `<div class="home-tiles-grid">` + noticeTile + feedbackTile + circularTile + `</div>`;
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────────
@@ -747,10 +797,44 @@ async function saveNotice() {
   if (sendSms) await sendNoticeSms(data);
 }
 
+let smsParentList = [];
+let selectedSmsPhones = new Set();
+
+async function openSmsRecipients() {
+  const { data } = await sb.from('fees').select('parent_name,parent_phone').not('parent_phone','is',null).neq('parent_phone','');
+  smsParentList = data ? [...new Map(data.map(f => [f.parent_phone, f])).values()] : [];
+  selectedSmsPhones = new Set(smsParentList.map(f => f.parent_phone));
+  renderSmsRecipients();
+  document.getElementById('smsRecipientsList').style.display = 'block';
+}
+
+function renderSmsRecipients() {
+  const el = document.getElementById('smsRecipientsList');
+  if (!smsParentList.length) { el.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0;">No parent phone numbers found.</div>'; return; }
+  el.innerHTML = `<div style="display:flex;gap:8px;margin-bottom:8px;">
+    <button onclick="selectAllSms(true)" style="font-size:10px;padding:4px 10px;border-radius:8px;border:1px solid var(--cream);background:var(--navy);color:#fff;cursor:pointer;">Select All</button>
+    <button onclick="selectAllSms(false)" style="font-size:10px;padding:4px 10px;border-radius:8px;border:1px solid var(--cream);background:var(--bg);color:var(--muted);cursor:pointer;">None</button>
+  </div>` + smsParentList.map(f => `
+    <label style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--cream);cursor:pointer;">
+      <input type="checkbox" ${selectedSmsPhones.has(f.parent_phone)?'checked':''} onchange="toggleSmsPhone('${f.parent_phone}',this.checked)"/>
+      <span style="font-size:12px;color:var(--ink);">${f.parent_name||'Parent'}</span>
+      <span style="font-size:11px;color:var(--muted);margin-left:auto;">${f.parent_phone}</span>
+    </label>`).join('');
+}
+
+function toggleSmsPhone(phone, checked) {
+  if (checked) selectedSmsPhones.add(phone);
+  else selectedSmsPhones.delete(phone);
+}
+
+function selectAllSms(all) {
+  selectedSmsPhones = all ? new Set(smsParentList.map(f => f.parent_phone)) : new Set();
+  renderSmsRecipients();
+}
+
 async function sendNoticeSms(notice) {
-  const { data: feeData } = await sb.from('fees').select('parent_phone').not('parent_phone', 'is', null).neq('parent_phone', '');
-  if (!feeData || !feeData.length) return;
-  const phones = [...new Set(feeData.map(f => f.parent_phone).filter(Boolean))];
+  const phones = [...selectedSmsPhones];
+  if (!phones.length) return;
   const message = `[${notice.category}] ${notice.title}: ${notice.body.slice(0, 100)}${notice.body.length > 100 ? '...' : ''} — Jewel Model Primary School`;
   let sent = 0;
   for (const phone of phones) {
@@ -759,8 +843,10 @@ async function sendNoticeSms(notice) {
       sent++;
     } catch (e) {}
   }
-  await sb.from('notices').update({ sms_sent: true }).eq('id', notice.id);
-  toast(`📨 SMS sent to ${sent} parents`);
+  if (sent > 0) {
+    await sb.from('notices').update({ sms_sent: true }).eq('id', notice.id);
+    toast(`📨 SMS sent to ${sent} parent${sent!==1?'s':''}`);
+  }
 }
 
 function openNoticeDetail(id) {
@@ -787,6 +873,16 @@ async function deleteNotice(id) {
 }
 
 // ── FEEDBACK ──────────────────────────────────────────────────────────────────
+async function deleteFeedback(id) {
+  if (!confirm('Delete this feedback?')) return;
+  await sb.from('feedback').delete().eq('id', id);
+  feedbackItems = feedbackItems.filter(f => f.id !== id);
+  renderFeedbackList();
+  const countEl = document.getElementById('inboxCount');
+  if (countEl) countEl.textContent = `${feedbackItems.length} item${feedbackItems.length !== 1 ? 's' : ''}`;
+  toast('Feedback deleted');
+}
+
 async function loadFeedback() {
   const { data } = await sb.from('feedback').select('*').order('created_at', { ascending: false });
   feedbackItems = data || [];
@@ -812,6 +908,7 @@ function renderFeedbackList() {
       <div class="fb-item-name">${f.name || 'Anonymous'} <span class="fb-item-meta">· ${refNum} · ${date}</span></div>
       <div class="fb-item-msg">${f.message}</div>
       ${f.reply ? `<div class="fb-item-reply">✅ Replied: ${f.reply}</div>` : `<button class="fb-reply-btn" onclick="openFeedbackReply('${f.id}')">Reply</button>`}
+      <button onclick="deleteFeedback('${f.id}')" style="background:none;border:none;color:var(--red);font-size:11px;cursor:pointer;margin-top:4px;font-family:'Outfit',sans-serif;">🗑 Delete</button>
     </div>`;
   }).join('');
 }
