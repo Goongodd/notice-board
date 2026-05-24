@@ -703,7 +703,7 @@ function openSection(section) {
     if (isStaff) {
       document.getElementById('feedbackParentView').style.display = 'none';
       document.getElementById('feedbackStaffView').style.display = 'block';
-      loadFeedback();
+      loadFeedback(true);
     } else {
       document.getElementById('feedbackParentView').style.display = 'block';
       document.getElementById('feedbackStaffView').style.display = 'none';
@@ -781,6 +781,9 @@ function openNoticeModal() {
 
 function closeNoticeModal() { document.getElementById('noticeModal').classList.add('hidden'); }
 
+let smsParentList = [];
+let selectedSmsPhones = new Set();
+
 async function saveNotice() {
   const title = document.getElementById('noticeTitle').value.trim();
   const body = document.getElementById('noticeBody').value.trim();
@@ -795,9 +798,6 @@ async function saveNotice() {
   toast('✅ Notice posted');
   if (selectedSmsPhones.size > 0) await sendNoticeSms(data);
 }
-
-let smsParentList = [];
-let selectedSmsPhones = new Set();
 
 async function openSmsRecipients() {
   const { data } = await sb.from('fees').select('parent_name,parent_phone').not('parent_phone','is',null).neq('parent_phone','');
@@ -876,6 +876,7 @@ async function deleteFeedback(id) {
   if (!confirm('Delete this feedback?')) return;
   const { error } = await sb.from('feedback').delete().eq('id', id);
   if (error) { toast('Failed to delete: ' + error.message); return; }
+  deletedFeedbackIds.add(id);
   feedbackItems = feedbackItems.filter(f => f.id !== id);
   renderFeedbackList();
   const countEl = document.getElementById('inboxCount');
@@ -883,9 +884,14 @@ async function deleteFeedback(id) {
   toast('Feedback deleted');
 }
 
-async function loadFeedback() {
+// Track locally deleted feedback IDs so they don't reappear on reload
+const deletedFeedbackIds = new Set();
+
+async function loadFeedback(preserveDeleted = false) {
   const { data } = await sb.from('feedback').select('*').order('created_at', { ascending: false });
-  feedbackItems = data || [];
+  const raw = data || [];
+  // Filter out any items deleted locally this session
+  feedbackItems = preserveDeleted ? raw.filter(f => !deletedFeedbackIds.has(f.id)) : raw;
   renderFeedbackList();
   const countEl = document.getElementById('inboxCount');
   if (countEl) countEl.textContent = `${feedbackItems.length} item${feedbackItems.length !== 1 ? 's' : ''}`;
