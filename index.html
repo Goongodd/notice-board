@@ -775,7 +775,8 @@ function openNoticeModal() {
   document.getElementById('noticeTitle').value = '';
   document.getElementById('noticeBody').value = '';
   document.getElementById('noticeCategory').value = 'General';
-  document.getElementById('noticeSms').checked = true;
+  selectedSmsPhones = new Set();
+  document.getElementById('smsRecipientsList').style.display = 'none';
   document.getElementById('noticeModal').classList.remove('hidden');
 }
 
@@ -947,7 +948,7 @@ async function checkFeedbackReply() {
   if (!ref.startsWith('FB-')) { toast('Invalid reference number'); return; }
   const code = ref.replace('FB-', '').toLowerCase();
   const { data: allData } = await sb.from('feedback').select('*');
-  const data = allData ? allData.find(f => f.id.slice(0, 4).toLowerCase() === code) : null;
+  const data = allData ? allData.find(f => f.id.slice(0, 4).toLowerCase() === code && !deletedFeedbackIds.has(f.id)) : null;
   const el = document.getElementById('fbReplyResult');
   if (!data) { el.innerHTML = '<div class="fb-ref-badge">No feedback found with that reference number.</div>'; return; }
   const date = new Date(data.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
