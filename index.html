@@ -785,16 +785,15 @@ async function saveNotice() {
   const title = document.getElementById('noticeTitle').value.trim();
   const body = document.getElementById('noticeBody').value.trim();
   const category = document.getElementById('noticeCategory').value;
-  const sendSms = document.getElementById('noticeSms').checked;
   if (!title || !body) { toast('Please fill in title and body'); return; }
   const author = currentUser?.email?.split('@')[0] || 'Staff';
   const { data, error } = await sb.from('notices').insert({ title, body, category, author, author_id: currentUser?.id, sms_sent: false }).select().single();
-  if (error) { toast('Failed to post notice'); return; }
+  if (error) { toast('Failed to post notice: ' + error.message); return; }
   notices.unshift(data);
   renderNotices();
   closeNoticeModal();
   toast('✅ Notice posted');
-  if (sendSms) await sendNoticeSms(data);
+  if (selectedSmsPhones.size > 0) await sendNoticeSms(data);
 }
 
 let smsParentList = [];
@@ -875,7 +874,8 @@ async function deleteNotice(id) {
 // ── FEEDBACK ──────────────────────────────────────────────────────────────────
 async function deleteFeedback(id) {
   if (!confirm('Delete this feedback?')) return;
-  await sb.from('feedback').delete().eq('id', id);
+  const { error } = await sb.from('feedback').delete().eq('id', id);
+  if (error) { toast('Failed to delete: ' + error.message); return; }
   feedbackItems = feedbackItems.filter(f => f.id !== id);
   renderFeedbackList();
   const countEl = document.getElementById('inboxCount');
@@ -968,7 +968,10 @@ async function submitFeedbackReply() {
   if (error) { toast('Failed to send reply'); return; }
   closeModal('feedbackReplyModal');
   toast('✅ Reply sent');
-  loadFeedback();
+  // Update local state instead of reloading from DB
+  const item = feedbackItems.find(f => f.id === activeFeedbackId);
+  if (item) { item.reply = reply; item.replied_by = author; }
+  renderFeedbackList();
 }
 
 // ── CIRCULARS ─────────────────────────────────────────────────────────────────
