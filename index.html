@@ -801,8 +801,20 @@ async function saveNotice() {
 }
 
 async function openSmsRecipients() {
-  const { data } = await sb.from('fees').select('parent_name,parent_phone').not('parent_phone','is',null).neq('parent_phone','');
-  smsParentList = data ? [...new Map(data.map(f => [f.parent_phone, f])).values()] : [];
+  const [feesRes, settRes] = await Promise.all([
+    sb.from('fees').select('student_id,parent_phone').not('parent_phone','is',null).neq('parent_phone','').eq('user_id', currentUser?.id),
+    sb.from('user_settings').select('students').eq('user_id', currentUser?.id).single()
+  ]);
+  const studentsList = settRes.data?.students || [];
+  const feesData = feesRes.data || [];
+  // Build unique list with student name
+  const seen = new Set();
+  smsParentList = feesData
+    .filter(f => f.parent_phone && !seen.has(f.parent_phone) && seen.add(f.parent_phone))
+    .map(f => {
+      const student = studentsList.find(s => String(s.id) === String(f.student_id));
+      return { parent_phone: f.parent_phone, display_name: student ? `Parent of ${student.name}` : `Student #${f.student_id}` };
+    });
   selectedSmsPhones = new Set(smsParentList.map(f => f.parent_phone));
   renderSmsRecipients();
   document.getElementById('smsRecipientsList').style.display = 'block';
@@ -817,7 +829,7 @@ function renderSmsRecipients() {
   </div>` + smsParentList.map(f => `
     <label style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--cream);cursor:pointer;">
       <input type="checkbox" ${selectedSmsPhones.has(f.parent_phone)?'checked':''} onchange="toggleSmsPhone('${f.parent_phone}',this.checked)"/>
-      <span style="font-size:12px;color:var(--ink);">${f.parent_name||'Parent'}</span>
+      <span style="font-size:12px;color:var(--ink);">${f.display_name||'Parent'}</span>
       <span style="font-size:11px;color:var(--muted);margin-left:auto;">${f.parent_phone}</span>
     </label>`).join('');
 }
