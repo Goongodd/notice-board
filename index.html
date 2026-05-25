@@ -243,7 +243,7 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
     <div class="welcome-tagline">Stay informed. Stay connected.</div>
   </div>
   <div class="welcome-buttons">
-    <button class="welcome-parent-btn ripple" onclick="enterAsPublic()">
+    <button class="welcome-parent-btn ripple" onclick="showParentOptions()">
       <svg style="position:absolute;right:-10px;bottom:-10px;opacity:.12;width:130px;height:130px;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="35" cy="28" r="14" fill="#0d1e3a"/>
         <ellipse cx="35" cy="65" rx="22" ry="18" fill="#0d1e3a"/>
@@ -291,6 +291,79 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
     <input type="password" id="authPassword" placeholder="Password" class="auth-input"/>
     <button class="auth-btn ripple" onclick="signIn()">Sign In</button>
     <button class="auth-link ripple" onclick="showForgotPassword()">Forgot password?</button>
+  </div>
+</div>
+
+<!-- PARENT OPTIONS -->
+<div class="auth-screen hidden" id="parentOptionsScreen">
+  <div class="auth-card">
+    <button class="auth-back-btn ripple" onclick="showWelcome()">← Back</button>
+    <div class="auth-logo">JMS-N</div>
+    <div class="auth-sub">Parent Access</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
+      <button onclick="enterAsPublic()" style="width:100%;background:var(--gold);color:var(--navy);border:none;border-radius:14px;padding:18px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:14px;">
+        <span style="font-size:28px;">🏫</span>
+        <div>
+          <div style="font-size:15px;font-weight:700;font-family:'Playfair Display',serif;">General Access</div>
+          <div style="font-size:11px;margin-top:3px;opacity:.7;">View school notices, circulars and send feedback</div>
+        </div>
+      </button>
+      <button onclick="showParentTokenScreen()" style="width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);color:#fff;border-radius:14px;padding:18px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:14px;">
+        <span style="font-size:28px;">👶</span>
+        <div>
+          <div style="font-size:15px;font-weight:700;font-family:'Playfair Display',serif;">My Child's Info</div>
+          <div style="font-size:11px;margin-top:3px;opacity:.5;">See your child's attendance, grades & class notices</div>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PARENT TOKEN SCREEN -->
+<div class="auth-screen hidden" id="parentTokenScreen">
+  <div class="auth-card">
+    <button class="auth-back-btn ripple" onclick="showParentOptions()">← Back</button>
+    <div class="auth-logo">JMS-N</div>
+    <div class="auth-sub">Enter Your Child's Link</div>
+    <p style="font-size:11px;color:rgba(255,255,255,.4);text-align:center;margin-bottom:16px;line-height:1.6;">Paste the link your teacher sent you, or just the code at the end after <strong style="color:rgba(255,255,255,.6);">?pv=</strong></p>
+    <div id="parentTokenError" class="auth-error hidden"></div>
+    <input type="text" id="parentTokenInput" placeholder="Paste link or token here" class="auth-input" style="word-break:break-all;"/>
+    <button class="auth-btn ripple" onclick="verifyParentToken()">Continue →</button>
+  </div>
+</div>
+
+<!-- CLASS PICKER (Staff) -->
+<div class="auth-screen hidden" id="classPickerScreen">
+  <div class="auth-card">
+    <button class="auth-back-btn ripple" onclick="showWelcome()">← Back</button>
+    <div class="auth-logo">JMS-N</div>
+    <div class="auth-sub">Select Your Class</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
+      <button onclick="selectClass('Basic 1')" style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);color:#fff;border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;">
+        <div style="font-size:22px;margin-bottom:4px;">🏫</div>
+        <div style="font-size:13px;font-weight:700;">Basic 1</div>
+      </button>
+      <button onclick="selectClass('Basic 2')" style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);color:#fff;border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;">
+        <div style="font-size:22px;margin-bottom:4px;">🏫</div>
+        <div style="font-size:13px;font-weight:700;">Basic 2</div>
+      </button>
+      <button onclick="selectClass('Basic 3')" style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);color:#fff;border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;">
+        <div style="font-size:22px;margin-bottom:4px;">🏫</div>
+        <div style="font-size:13px;font-weight:700;">Basic 3</div>
+      </button>
+      <button onclick="selectClass('Basic 4')" style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);color:#fff;border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;">
+        <div style="font-size:22px;margin-bottom:4px;">🏫</div>
+        <div style="font-size:13px;font-weight:700;">Basic 4</div>
+      </button>
+      <button onclick="selectClass('Basic 5')" style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);color:#fff;border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;">
+        <div style="font-size:22px;margin-bottom:4px;">🏫</div>
+        <div style="font-size:13px;font-weight:700;">Basic 5</div>
+      </button>
+      <button onclick="selectClass('Basic 6')" style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);color:#fff;border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;">
+        <div style="font-size:22px;margin-bottom:4px;">🏫</div>
+        <div style="font-size:13px;font-weight:700;">Basic 6</div>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -485,6 +558,9 @@ const sb = createClient(SUPA_URL, SUPA_KEY);
 // ── STATE ────────────────────────────────────────────────────────────────────
 let currentUser = null;
 let currentRole = 'public';
+let selectedClass = null; // e.g. 'Basic 1', 'Basic 2' etc.
+let parentToken = null;   // stored parent link token
+let parentStudentData = null; // cached parent view data
 let notices = [];
 let feedbackItems = [];
 let circulars = [];
@@ -520,6 +596,10 @@ window.addEventListener('popstate', (e) => {
 });
 
 async function checkSession() {
+  // Restore saved parent token
+  const savedToken = localStorage.getItem('jmsn_parent_token');
+  if (savedToken) parentToken = savedToken;
+
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
     currentUser = session.user;
@@ -539,32 +619,88 @@ function hideLoading() {
 }
 
 function showWelcome() {
+  ['parentOptionsScreen','parentTokenScreen','classPickerScreen','authScreen','app'].forEach(id => {
+    document.getElementById(id)?.classList.add('hidden');
+  });
   document.getElementById('welcomeScreen').classList.remove('hidden');
-  document.getElementById('authScreen').classList.add('hidden');
-  document.getElementById('app').classList.add('hidden');
+}
+
+function openMyChild() {
+  if (!parentToken) return;
+  window.open('https://jewel-model-school.vercel.app/?pv=' + parentToken, '_blank');
+}
+
+function showParentOptions() {
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  document.getElementById('parentOptionsScreen').classList.remove('hidden');
+}
+
+function showParentTokenScreen() {
+  document.getElementById('parentOptionsScreen').classList.add('hidden');
+  document.getElementById('parentTokenScreen').classList.remove('hidden');
+  // Pre-fill if token already saved
+  const saved = localStorage.getItem('jmsn_parent_token');
+  if (saved) document.getElementById('parentTokenInput').value = saved;
+}
+
+async function verifyParentToken() {
+  let raw = document.getElementById('parentTokenInput').value.trim();
+  // Extract token from full URL if pasted
+  if (raw.includes('?pv=')) raw = raw.split('?pv=')[1].split('&')[0];
+  if (!raw) { showTokenError('Please enter your token or link'); return; }
+  // Validate against Supabase
+  const { data } = await sb.from('parent_tokens').select('token,student_id,teacher_id').eq('token', raw).single();
+  if (!data) { showTokenError('Invalid token. Please check the link your teacher sent.'); return; }
+  // Save token locally
+  localStorage.setItem('jmsn_parent_token', raw);
+  parentToken = raw;
+  currentRole = 'parent_child';
+  document.getElementById('parentTokenScreen').classList.add('hidden');
+  showApp();
+}
+
+function showTokenError(msg) {
+  const el = document.getElementById('parentTokenError');
+  el.textContent = msg;
+  el.classList.remove('hidden');
 }
 
 function showStaffLogin() {
   document.getElementById('welcomeScreen').classList.add('hidden');
+  document.getElementById('classPickerScreen').classList.remove('hidden');
+}
+
+function selectClass(cls) {
+  selectedClass = cls;
+  document.getElementById('classPickerScreen').classList.add('hidden');
   document.getElementById('authScreen').classList.remove('hidden');
+  document.querySelector('.auth-sub').textContent = cls + ' · Staff Portal';
 }
 
 function enterAsPublic() {
   currentRole = 'public';
   currentUser = null;
-  document.getElementById('welcomeScreen').classList.add('hidden');
+  parentToken = null;
+  ['parentOptionsScreen','parentTokenScreen'].forEach(id => document.getElementById(id).classList.add('hidden'));
   showApp();
 }
 
-function showApp() {
+async function showApp() {
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('welcomeScreen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   const isStaff = currentRole === 'admin' || currentRole === 'teacher';
-  const roleLabel = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? 'Teacher' : 'Parent';
+  const isParentChild = currentRole === 'parent_child';
+  const roleLabel = currentRole === 'admin' ? 'Admin' : currentRole === 'teacher' ? (selectedClass||'Teacher') : isParentChild ? 'Parent' : 'Parent';
   document.getElementById('headerRole').textContent = roleLabel;
   document.getElementById('signoutBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('parentSignoutBtn').style.display = isStaff ? 'none' : 'block';
+  // Load parent student data if parent_child
+  if (isParentChild && parentToken && !parentStudentData) {
+    const headers = { 'apikey': 'sb_publishable_BsLkDNVCE4FrJ-P4i5eGIw_euUo4SNm', 'Authorization': 'Bearer sb_publishable_BsLkDNVCE4FrJ-P4i5eGIw_euUo4SNm', 'Content-Type': 'application/json' };
+    const res = await fetch('https://orfhhiyaigeokebwglkb.supabase.co/rest/v1/rpc/get_parent_view', { method: 'POST', headers, body: JSON.stringify({ p_token: parentToken }) });
+    parentStudentData = await res.json();
+  }
   renderHomeTiles();
   loadNotices();
   loadCirculars();
@@ -599,6 +735,9 @@ function showAuthError(msg) {
 function parentSignOut() {
   currentRole = 'public';
   currentUser = null;
+  parentToken = null;
+  parentStudentData = null;
+  localStorage.removeItem('jmsn_parent_token');
   document.getElementById('app').classList.add('hidden');
   showWelcome();
 }
@@ -620,9 +759,21 @@ function showForgotPassword() {
 // ── HOME DASHBOARD ────────────────────────────────────────────────────────────
 function renderHomeTiles() {
   const isStaff = currentRole === 'admin' || currentRole === 'teacher';
+  const isParentChild = currentRole === 'parent_child';
   const container = document.getElementById('homeTiles');
+
+  // Greeting
+  let greetingName = '';
+  if (isParentChild && parentStudentData) {
+    const s = parentStudentData.settings;
+    const sid = parentStudentData.student_id;
+    const student = (s?.students||[]).find(x=>String(x.id)===String(sid));
+    greetingName = student ? ` — ${student.name}` : '';
+  }
   const greeting = isStaff
-    ? `<div class="home-greeting"><div class="home-greeting-title">Good day! 👋</div><div class="home-greeting-sub">Jewel Model Primary School</div></div>`
+    ? `<div class="home-greeting"><div class="home-greeting-title">Good day! 👋</div><div class="home-greeting-sub">${selectedClass||'Jewel Model Primary School'}</div></div>`
+    : isParentChild
+    ? `<div class="home-greeting"><div class="home-greeting-title">Welcome 👋</div><div class="home-greeting-sub">Jewel Model Primary School${greetingName}</div></div>`
     : `<div class="home-greeting"><div class="home-greeting-title">Welcome, Parent 👋</div><div class="home-greeting-sub">Jewel Model Primary School</div></div>`;
 
   const noticeTile = `
@@ -643,6 +794,12 @@ function renderHomeTiles() {
 
   const feedbackTile = isStaff
     ? `<div class="home-tile tile-feedback-staff ripple" onclick="openSection('feedback')" style="flex:1;">
+        <svg style="position:absolute;right:-10px;bottom:-10px;opacity:.10;width:130px;height:130px;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="25" width="80" height="55" rx="6" fill="white"/>
+          <polyline points="10,25 50,58 90,25" stroke="#1a3a6a" stroke-width="4" fill="none"/>
+          <line x1="10" y1="80" x2="35" y2="55" stroke="#1a3a6a" stroke-width="3"/>
+          <line x1="90" y1="80" x2="65" y2="55" stroke="#1a3a6a" stroke-width="3"/>
+        </svg>
         <div>
           <div class="home-tile-icon">📬</div>
           <div class="home-tile-title">Feedback Inbox</div>
@@ -651,6 +808,12 @@ function renderHomeTiles() {
         <span class="home-tile-arrow">→</span>
       </div>`
     : `<div class="home-tile tile-feedback-parent ripple" onclick="openSection('feedback')" style="flex:1;">
+        <svg style="position:absolute;right:-10px;bottom:-10px;opacity:.12;width:130px;height:130px;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="15" width="58" height="38" rx="10" fill="#0d1e3a"/>
+          <polygon points="20,53 15,68 35,53" fill="#0d1e3a"/>
+          <rect x="34" y="40" width="55" height="34" rx="10" fill="#0d1e3a" opacity=".6"/>
+          <polygon points="72,74 85,86 68,74" fill="#0d1e3a" opacity=".6"/>
+        </svg>
         <div>
           <div class="home-tile-icon">💬</div>
           <div class="home-tile-title">Send Feedback</div>
@@ -678,7 +841,22 @@ function renderHomeTiles() {
       <span class="home-tile-arrow">→</span>
     </div>`;
 
-  container.innerHTML = greeting + `<div class="home-tiles-grid">` + noticeTile + feedbackTile + circularTile + `</div>`;
+  // My Child tile — only for parent_child role
+  const myChildTile = isParentChild ? `
+    <div class="home-tile ripple" onclick="openMyChild()" style="flex:1;background:linear-gradient(135deg,#1a6b3c,#27ae60);color:#fff;">
+      <svg style="position:absolute;right:-10px;bottom:-10px;opacity:.12;width:130px;height:130px;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="30" r="18" fill="white"/>
+        <ellipse cx="50" cy="75" rx="30" ry="22" fill="white"/>
+      </svg>
+      <div>
+        <div class="home-tile-icon">👶</div>
+        <div class="home-tile-title">My Child</div>
+        <div class="home-tile-desc">View your child's attendance record, grades, report card and teacher's comments.</div>
+      </div>
+      <span class="home-tile-arrow">→</span>
+    </div>` : '';
+
+  container.innerHTML = greeting + `<div class="home-tiles-grid">` + noticeTile + (isParentChild ? myChildTile : feedbackTile) + circularTile + (isParentChild ? feedbackTile : '') + `</div>`;
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────────
@@ -737,7 +915,17 @@ function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
 // ── NOTICES ───────────────────────────────────────────────────────────────────
 async function loadNotices() {
-  const { data, error } = await sb.from('notices').select('*').order('created_at', { ascending: false });
+  let query = sb.from('notices').select('*').order('created_at', { ascending: false });
+  // Staff see only their class notices + school-wide (no class tag)
+  if (selectedClass && (currentRole === 'teacher' || currentRole === 'admin')) {
+    query = query.or(`class_tag.eq.${selectedClass},class_tag.is.null`);
+  }
+  // Parent with token sees their child's class notices + school-wide
+  if (currentRole === 'parent_child' && parentStudentData?.settings?.cfg?.class) {
+    const cls = parentStudentData.settings.cfg.class;
+    query = query.or(`class_tag.eq.${cls},class_tag.is.null`);
+  }
+  const { data, error } = await query;
   if (error) { toast('Failed to load notices'); return; }
   notices = data || [];
   renderNotices();
@@ -791,7 +979,7 @@ async function saveNotice() {
   const category = document.getElementById('noticeCategory').value;
   if (!title || !body) { toast('Please fill in title and body'); return; }
   const author = currentUser?.email?.split('@')[0] || 'Staff';
-  const { data, error } = await sb.from('notices').insert({ title, body, category, author, author_id: currentUser?.id, sms_sent: false }).select().single();
+  const { data, error } = await sb.from('notices').insert({ title, body, category, author, author_id: currentUser?.id, sms_sent: false, class_tag: selectedClass||null }).select().single();
   if (error) { toast('Failed to post notice: ' + error.message); return; }
   notices.unshift(data);
   renderNotices();
