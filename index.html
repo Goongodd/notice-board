@@ -723,6 +723,21 @@ async function signIn() {
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session.user;
   await loadUserRole();
+
+  // ── CLASS ACCESS CHECK ──
+  if (currentRole === 'teacher') {
+    const { data: profile } = await sb.from('profiles')
+      .select('assigned_class')
+      .eq('id', currentUser.id)
+      .single();
+    if (profile?.assigned_class && profile.assigned_class !== selectedClass) {
+      await sb.auth.signOut();
+      currentUser = null;
+      showAuthError(`You are not assigned to ${selectedClass}. Please go back and select your correct class.`);
+      return;
+    }
+  }
+
   showApp();
 }
 
