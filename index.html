@@ -467,6 +467,16 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
       <div class="circulars-list" id="circularsList"></div>
     </div>
 
+    <!-- STAFF MANAGEMENT (Admin only) -->
+    <div class="view" id="vStaffMgmt">
+      <div style="padding:12px 16px 4px;">
+        <div style="font-size:var(--fs-xs);color:var(--muted);line-height:1.6;background:var(--white);border-radius:12px;padding:12px 14px;border-left:4px solid var(--gold);">
+          Assign classes and roles to staff. Changes take effect on their next login.
+        </div>
+      </div>
+      <div class="notices-list" id="staffList"></div>
+    </div>
+
   </div>
 </div>
 
@@ -867,18 +877,29 @@ function renderHomeTiles() {
       <span class="home-tile-arrow">→</span>
     </div>` : '';
 
-  container.innerHTML = greeting + `<div class="home-tiles-grid">` + noticeTile + (isParentChild ? myChildTile : feedbackTile) + circularTile + (isParentChild ? feedbackTile : '') + `</div>`;
+  // Staff Management tile — only for admin
+  const staffMgmtTile = currentRole === 'admin' ? `
+    <div class="home-tile ripple" onclick="openSection('staffmgmt')" style="flex:1;background:linear-gradient(135deg,#1a2e4a,#2a4a7a);color:#fff;">
+      <div>
+        <div class="home-tile-icon">👥</div>
+        <div class="home-tile-title">Staff Management</div>
+        <div class="home-tile-desc">Assign classes to teachers and manage staff roles from one place.</div>
+      </div>
+      <span class="home-tile-arrow">→</span>
+    </div>` : '';
+
+  container.innerHTML = greeting + `<div class="home-tiles-grid">` + noticeTile + (isParentChild ? myChildTile : feedbackTile) + circularTile + (isParentChild ? feedbackTile : '') + staffMgmtTile + `</div>`;
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────────
 function openSection(section) {
   currentSection = section;
-  const sectionMap = { notices: 'vNotices', feedback: 'vFeedback', circulars: 'vCirculars' };
-  const titleMap = { notices: '📢 Noticeboard', feedback: '📬 Feedback', circulars: '📄 Circulars' };
+  const sectionMap = { notices: 'vNotices', feedback: 'vFeedback', circulars: 'vCirculars', staffmgmt: 'vStaffMgmt' };
+  const titleMap = { notices: '📢 Noticeboard', feedback: '📬 Feedback', circulars: '📄 Circulars', staffmgmt: '👥 Staff Management' };
   const isStaff = currentRole === 'admin' || currentRole === 'teacher';
 
-  ['vHome','vNotices','vFeedback','vCirculars'].forEach(v => {
-    document.getElementById(v).classList.remove('on');
+  ['vHome','vNotices','vFeedback','vCirculars','vStaffMgmt'].forEach(v => {
+    document.getElementById(v)?.classList.remove('on');
   });
   document.getElementById(sectionMap[section]).classList.add('on');
   document.getElementById('sectionTitle').textContent = titleMap[section];
@@ -902,11 +923,16 @@ function openSection(section) {
     document.getElementById('staffCircularActions').style.display = isStaff ? 'flex' : 'none';
     document.getElementById('circularParentBanner').style.display = isStaff ? 'none' : 'block';
   }
+  if (section === 'staffmgmt') {
+    loadStaffList();
+  }
 }
 
 function goHome() {
   currentSection = null;
-  ['vNotices','vFeedback','vCirculars'].forEach(v => document.getElementById(v).classList.remove('on'));
+  ['vNotices','vFeedback','vCirculars','vStaffMgmt'].forEach(v => {
+    document.getElementById(v)?.classList.remove('on');
+  });
   document.getElementById('vHome').classList.add('on');
   document.getElementById('sectionTitle').textContent = '';
   document.getElementById('backBtn').style.display = 'none';
@@ -1294,6 +1320,52 @@ function downloadCircularPdf(id) {
   doc.text('Jewel Model Primary School · JMS-N', PW/2, 293, { align: 'center' });
   doc.save(`${c.title.replace(/\s+/g,'_')}_Circular.pdf`);
   toast('📄 PDF downloaded');
+}
+
+// ── STAFF MANAGEMENT ──────────────────────────────────────────────────────────
+const CLASSES = ['Basic 1','Basic 2','Basic 3','Basic 4','Basic 5','Basic 6'];
+
+async function loadStaffList() {
+  const list = document.getElementById('staffList');
+  list.innerHTML = '<div class="notices-empty">Loading...</div>';
+  const { data, error } = await sb.from('profiles').select('id, email, role, assigned_class').order('email');
+  if (error || !data) { list.innerHTML = '<div class="notices-empty">Failed to load staff.</div>'; return; }
+  if (!data.length) { list.innerHTML = '<div class="notices-empty">No staff accounts found.</div>'; return; }
+  list.innerHTML = data.map(s => `
+    <div class="notice-card" style="border-left-color:var(--gold);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:var(--fs-sm);font-weight:700;color:var(--ink);">${s.email}</div>
+          <div style="font-size:var(--fs-xs);color:var(--muted);margin-top:2px;">Role: <strong>${s.role}</strong></div>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(201,164,74,.15);color:#8a6a10;flex-shrink:0;">${s.assigned_class || 'Unassigned'}</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select onchange="updateStaffClass('${s.id}', this.value)" style="flex:1;border:1.5px solid var(--cream);border-radius:8px;padding:8px 10px;font-size:var(--fs-xs);color:var(--ink);background:var(--bg);font-family:'Outfit',sans-serif;">
+          <option value="">— Assign Class —</option>
+          ${CLASSES.map(c => `<option value="${c}" ${s.assigned_class === c ? 'selected' : ''}>${c}</option>`).join('')}
+        </select>
+        <select onchange="updateStaffRole('${s.id}', this.value)" style="border:1.5px solid var(--cream);border-radius:8px;padding:8px 10px;font-size:var(--fs-xs);color:var(--ink);background:var(--bg);font-family:'Outfit',sans-serif;">
+          <option value="teacher" ${s.role === 'teacher' ? 'selected' : ''}>Teacher</option>
+          <option value="admin" ${s.role === 'admin' ? 'selected' : ''}>Admin</option>
+        </select>
+      </div>
+    </div>`).join('');
+}
+
+async function updateStaffClass(userId, assignedClass) {
+  const { error } = await sb.from('profiles').update({ assigned_class: assignedClass || null }).eq('id', userId);
+  if (error) { toast('Failed to update class'); return; }
+  toast(`✅ Class updated`);
+  loadStaffList();
+}
+
+async function updateStaffRole(userId, role) {
+  if (userId === currentUser?.id) { toast('You cannot change your own role'); loadStaffList(); return; }
+  const { error } = await sb.from('profiles').update({ role }).eq('id', userId);
+  if (error) { toast('Failed to update role'); return; }
+  toast(`✅ Role updated`);
+  loadStaffList();
 }
 
 // ── ONLINE/OFFLINE ─────────────────────────────────────────────────────────────
