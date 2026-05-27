@@ -610,21 +610,19 @@ document.getElementById('pwa-manifest').href = URL.createObjectURL(new Blob([JSO
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-  // Check if opened via a parent token link (?pv=...)
   const urlParams = new URLSearchParams(window.location.search);
   const pvToken = urlParams.get('pv');
-  if (pvToken) {
-    // Check if running as installed PWA
-    const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-    if (!isInstalled) {
-      // Show web prompt instead of loading app
-      document.getElementById('loading').classList.add('hidden');
-      showWebPrompt(pvToken);
-      return;
-    }
-    // Running as PWA — pre-fill token and go straight to token screen
-    localStorage.setItem('jmsn_pv_token', pvToken);
+
+  // Always check if running as installed PWA
+  const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+  if (pvToken && !isInstalled) {
+    // Token link opened in browser — block it always
+    document.getElementById('loading').classList.add('hidden');
+    showWebPrompt(pvToken);
+    return;
   }
+
   await checkSession();
   history.pushState({ section: null }, '');
 });
@@ -958,6 +956,7 @@ function openSection(section) {
   document.getElementById('sectionTitle').textContent = titleMap[section];
   document.getElementById('backBtn').style.display = 'flex';
   if (section === 'notices') {
+    const isStaff = currentRole === 'admin' || currentRole === 'teacher';
     document.getElementById('staffNoticeActions').style.display = isStaff ? 'flex' : 'none';
   }
   if (section === 'feedback') {
@@ -1007,15 +1006,17 @@ function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 // ── NOTICES ───────────────────────────────────────────────────────────────────
 async function loadNotices() {
   let query = sb.from('notices').select('*').order('created_at', { ascending: false });
-  // Staff see only their class notices + school-wide (no class tag)
-  if (selectedClass && (currentRole === 'teacher' || currentRole === 'admin')) {
-    query = query.or(`class_tag.eq.${selectedClass},class_tag.is.null`);
-  }
-  // Parent with token sees their child's class notices + school-wide
-  if (currentRole === 'parent_child' && parentStudentData?.settings?.cfg?.class) {
+
+  if (currentRole === 'teacher') {
+    // Teachers see their own class notices + school-wide (null class_tag)
+    query = query.or(`class_tag.eq.${currentUserAssignedClass},class_tag.is.null`);
+  } else if (currentRole === 'parent_child' && parentStudentData?.settings?.cfg?.class) {
+    // Token parents see their child's class notices + school-wide
     const cls = parentStudentData.settings.cfg.class;
     query = query.or(`class_tag.eq.${cls},class_tag.is.null`);
   }
+  // admin and general public (role=public) see everything — no filter
+
   const { data, error } = await query;
   if (error) { toast('Failed to load notices'); return; }
   notices = data || [];
@@ -1036,6 +1037,9 @@ function renderNotices() {
   list.innerHTML = filtered.map(n => {
     const date = new Date(n.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     const catClass = n.category.toLowerCase();
+    const sourceLabel = n.class_tag
+      ? `<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--cream);font-size:12px;font-weight:800;color:var(--navy);letter-spacing:.3px;">📚 CLASS: ${n.class_tag.toUpperCase()} &nbsp;·&nbsp; TEACHER: ${n.author.toUpperCase()}</div>`
+      : `<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--cream);font-size:12px;font-weight:800;color:var(--navy);letter-spacing:.3px;">🏫 FROM: SCHOOL ADMINISTRATION</div>`;
     return `<div class="notice-card ${catClass}" onclick="openNoticeDetail('${n.id}')">
       <div class="notice-card-header">
         <div class="notice-title">${n.title}</div>
@@ -1046,6 +1050,7 @@ function renderNotices() {
         <span class="notice-author">${n.author}</span>
         <span class="notice-date">${date}</span>
       </div>
+      ${sourceLabel}
     </div>`;
   }).join('');
 }
@@ -1070,7 +1075,9 @@ async function saveNotice() {
   const category = document.getElementById('noticeCategory').value;
   if (!title || !body) { toast('Please fill in title and body'); return; }
   const author = currentUser?.email?.split('@')[0] || 'Staff';
-  const { data, error } = await sb.from('notices').insert({ title, body, category, author, author_id: currentUser?.id, sms_sent: false, class_tag: selectedClass||null }).select().single();
+  // Admin posts are school-wide (null class_tag), teacher posts go to their class
+  const classTag = currentRole === 'admin' ? null : currentUserAssignedClass;
+  const { data, error } = await sb.from('notices').insert({ title, body, category, author, author_id: currentUser?.id, sms_sent: false, class_tag: classTag }).select().single();
   if (error) { toast('Failed to post notice: ' + error.message); return; }
   notices.unshift(data);
   renderNotices();
@@ -1147,9 +1154,17 @@ function openNoticeDetail(id) {
   document.getElementById('ndTitle').textContent = n.title;
   document.getElementById('ndMeta').textContent = `${n.category} · ${n.author} · ${date}`;
   document.getElementById('ndBody').textContent = n.body;
-  const isStaff = currentRole === 'admin' || currentRole === 'teacher';
-  const isAuthor = n.author_id === currentUser?.id;
-  document.getElementById('ndActions').innerHTML = isStaff && isAuthor
+  // Remove previously injected source label to prevent stacking
+  const prev = document.getElementById('ndSourceLabel');
+  if (prev) prev.remove();
+  const isAdmin = currentRole === 'admin';
+  const isOwnPost = n.author_id === currentUser?.id;
+  const canDelete = isAdmin || (currentRole === 'teacher' && isOwnPost);
+  const sourceLabel = n.class_tag
+    ? `<div id="ndSourceLabel" style="margin-top:12px;padding:10px 12px;background:rgba(13,30,58,.06);border-radius:8px;font-size:12px;font-weight:800;color:var(--navy);">📚 CLASS: ${n.class_tag.toUpperCase()} &nbsp;·&nbsp; TEACHER: ${n.author.toUpperCase()}</div>`
+    : `<div id="ndSourceLabel" style="margin-top:12px;padding:10px 12px;background:rgba(13,30,58,.06);border-radius:8px;font-size:12px;font-weight:800;color:var(--navy);">🏫 FROM: SCHOOL ADMINISTRATION</div>`;
+  document.getElementById('ndBody').insertAdjacentHTML('afterend', sourceLabel);
+  document.getElementById('ndActions').innerHTML = canDelete
     ? `<button class="nd-action-btn danger" onclick="deleteNotice('${n.id}')">🗑 Delete</button>` : '';
   document.getElementById('noticeDetailModal').classList.remove('hidden');
 }
