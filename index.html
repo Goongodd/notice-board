@@ -558,6 +558,7 @@ const sb = createClient(SUPA_URL, SUPA_KEY);
 // ── STATE ────────────────────────────────────────────────────────────────────
 let currentUser = null;
 let currentRole = 'public';
+let currentUserAssignedClass = null;
 let selectedClass = null; // e.g. 'Basic 1', 'Basic 2' etc.
 let parentToken = null;   // stored parent link token
 let parentStudentData = null; // cached parent view data
@@ -708,9 +709,10 @@ async function showApp() {
 
 async function loadUserRole() {
   try {
-    const { data } = await sb.from('profiles').select('role').eq('id', currentUser.id).single();
+    const { data } = await sb.from('profiles').select('role, assigned_class').eq('id', currentUser.id).single();
     currentRole = data?.role || 'teacher';
-  } catch (e) { currentRole = 'teacher'; }
+    currentUserAssignedClass = data?.assigned_class || null;
+  } catch (e) { currentRole = 'teacher'; currentUserAssignedClass = null; }
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
@@ -725,17 +727,11 @@ async function signIn() {
   await loadUserRole();
 
   // ── CLASS ACCESS CHECK ──
-  if (currentRole === 'teacher') {
-    const { data: profile } = await sb.from('profiles')
-      .select('assigned_class')
-      .eq('id', currentUser.id)
-      .single();
-    if (profile?.assigned_class && profile.assigned_class !== selectedClass) {
-      await sb.auth.signOut();
-      currentUser = null;
-      showAuthError(`You are not assigned to ${selectedClass}. Please go back and select your correct class.`);
-      return;
-    }
+  if (currentRole === 'teacher' && currentUserAssignedClass && currentUserAssignedClass !== selectedClass) {
+    await sb.auth.signOut();
+    currentUser = null;
+    showAuthError(`You are not assigned to ${selectedClass}. Please go back and select your correct class.`);
+    return;
   }
 
   showApp();
