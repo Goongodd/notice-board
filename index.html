@@ -224,6 +224,41 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 20px;border-radius:20px;font-size:var(--fs-xs);font-weight:600;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3);}
 .hidden{display:none!important;}
 .ripple:active{transform:scale(0.97);transition:transform .1s ease;}
+
+/* ── CHILD VIEW ── */
+.child-header-strip{background:var(--navy);padding:18px 16px 20px;}
+.child-name-large{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:#fff;margin-bottom:4px;}
+.child-meta-strip{font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.8px;text-transform:uppercase;}
+.child-tab-bar{display:flex;gap:0;background:var(--white);border-radius:12px;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin:14px 16px 0;}
+.child-tab{flex:1;padding:8px 4px;text-align:center;font-size:11px;font-weight:700;border-radius:8px;cursor:pointer;color:var(--muted);transition:all .2s;border:none;background:none;font-family:'Outfit',sans-serif;}
+.child-tab.active{background:var(--navy);color:#fff;}
+.child-tab-content{padding:14px 16px 24px;display:flex;flex-direction:column;gap:12px;}
+.cv-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.cv-stat{background:var(--white);border-radius:14px;padding:16px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.cv-stat-val{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;margin-bottom:4px;}
+.cv-stat-label{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.cv-section{background:var(--white);border-radius:14px;padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.cv-section-title{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:10px;}
+.cv-absence-card{background:rgba(181,43,43,.07);border-radius:14px;padding:14px;}
+.cv-absence-row{display:flex;justify-content:space-between;font-size:11px;color:var(--red);padding:4px 0;border-bottom:1px solid rgba(181,43,43,.1);}
+.cv-absence-row:last-child{border-bottom:none;}
+.cv-alert{background:#fff3cd;border-radius:14px;padding:12px 14px;}
+.cv-trait-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--cream);}
+.cv-trait-row:last-child{border-bottom:none;}
+.cv-trait-name{font-size:12px;color:var(--ink);font-weight:500;}
+.cv-score-badge{background:var(--navy);color:#fff;font-family:'Playfair Display',serif;font-size:12px;font-weight:600;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;}
+.cv-comment{background:rgba(13,30,58,.05);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12px;color:var(--muted);line-height:1.6;font-style:italic;}
+.cv-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;}
+.cv-table{width:100%;border-collapse:collapse;min-width:300px;font-size:11px;}
+.cv-table th{text-align:center;padding:7px 4px;color:var(--navy);font-weight:700;background:rgba(13,30,58,.05);}
+.cv-table th:first-child{text-align:left;padding-left:8px;}
+.cv-table td{text-align:center;padding:6px 4px;border-bottom:1px solid rgba(0,0,0,.05);}
+.cv-table td:first-child{text-align:left;padding-left:8px;font-weight:600;font-size:12px;color:var(--ink);}
+.cv-grades-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;}
+.cv-summary-tile{background:rgba(13,30,58,.05);border-radius:10px;padding:10px;text-align:center;}
+.cv-summary-val{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:2px;}
+.cv-summary-label{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;}
+.cv-footer{background:rgba(26,122,74,.08);border-radius:14px;padding:12px;text-align:center;font-size:11px;color:var(--green);font-weight:700;}
 </style>
 </head>
 <body>
@@ -495,6 +530,38 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
       <div class="notices-list" id="staffList"></div>
     </div>
 
+    <!-- MY CHILD VIEW (Parent token only) -->
+    <div class="view" id="vChildView">
+      <div class="child-header-strip">
+        <div class="child-name-large" id="cvStudentName">Loading...</div>
+        <div class="child-meta-strip" id="cvStudentMeta"></div>
+      </div>
+      <div class="child-tab-bar">
+        <button class="child-tab active" onclick="switchChildTab(this,'cvAttTab')">Attendance</button>
+        <button class="child-tab" onclick="switchChildTab(this,'cvGradesTab')">Grades</button>
+        <button class="child-tab" onclick="switchChildTab(this,'cvReportTab')">Report</button>
+      </div>
+      <!-- ATTENDANCE TAB -->
+      <div id="cvAttTab" class="child-tab-content">
+        <div class="cv-stats-grid" id="cvStatsGrid">
+          <div class="cv-stat"><div class="cv-stat-val" style="color:var(--green);" id="cvPresent">—</div><div class="cv-stat-label">Days Present</div></div>
+          <div class="cv-stat"><div class="cv-stat-val" style="color:var(--navy);" id="cvPct">—</div><div class="cv-stat-label">Attendance</div></div>
+          <div class="cv-stat"><div class="cv-stat-val" style="color:var(--red);" id="cvAbsent">—</div><div class="cv-stat-label">Days Absent</div></div>
+          <div class="cv-stat"><div class="cv-stat-val" style="color:var(--gold);" id="cvStars">—</div><div class="cv-stat-label">Stars Earned</div></div>
+        </div>
+        <div id="cvAbsenceRecord"></div>
+        <div id="cvAlertBanner"></div>
+      </div>
+      <!-- GRADES TAB -->
+      <div id="cvGradesTab" class="child-tab-content" style="display:none;">
+        <div id="cvGradesContent"><div class="notices-empty">Loading grades...</div></div>
+      </div>
+      <!-- REPORT TAB -->
+      <div id="cvReportTab" class="child-tab-content" style="display:none;">
+        <div id="cvReportContent"><div class="notices-empty">Loading report...</div></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -661,6 +728,23 @@ async function checkSession() {
   parentToken = null;
   currentUser = null;
   currentRole = 'public';
+
+  // Check if a ?pv= token is in the URL — auto-login parent
+  const urlParams = new URLSearchParams(window.location.search);
+  const pvToken = urlParams.get('pv');
+  if (pvToken) {
+    const { data } = await sb.from('parent_tokens').select('token,student_id,teacher_id').eq('token', pvToken).single();
+    if (data) {
+      parentToken = pvToken;
+      currentRole = 'parent_child';
+      localStorage.setItem('jmsn_parent_token', pvToken);
+      hideLoading();
+      await showApp();
+      openMyChild();
+      return;
+    }
+  }
+
   hideLoading();
   showWelcome();
 }
@@ -678,9 +762,240 @@ function showWelcome() {
   document.getElementById('welcomeScreen').classList.remove('hidden');
 }
 
-function openMyChild() {
+async function openMyChild() {
   if (!parentToken) return;
-  window.open('https://jewel-model-school.vercel.app/?pv=' + parentToken, '_blank');
+  // Switch to child view
+  currentSection = 'childview';
+  ['vHome','vNotices','vFeedback','vCirculars','vStaffMgmt','vChildView'].forEach(v => {
+    document.getElementById(v)?.classList.remove('on');
+  });
+  document.getElementById('vChildView').classList.add('on');
+  document.getElementById('sectionTitle').textContent = "👦 My Child's Info";
+  document.getElementById('backBtn').style.display = 'flex';
+
+  // Reset tabs
+  document.querySelectorAll('.child-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.child-tab').classList.add('active');
+  document.getElementById('cvAttTab').style.display = 'flex';
+  document.getElementById('cvGradesTab').style.display = 'none';
+  document.getElementById('cvReportTab').style.display = 'none';
+
+  // Show loading state
+  document.getElementById('cvStudentName').textContent = 'Loading...';
+  document.getElementById('cvStudentMeta').textContent = '';
+  document.getElementById('cvPresent').textContent = '—';
+  document.getElementById('cvPct').textContent = '—';
+  document.getElementById('cvAbsent').textContent = '—';
+  document.getElementById('cvStars').textContent = '—';
+  document.getElementById('cvAbsenceRecord').innerHTML = '';
+  document.getElementById('cvAlertBanner').innerHTML = '';
+  document.getElementById('cvGradesContent').innerHTML = '<div class="notices-empty">Loading grades...</div>';
+  document.getElementById('cvReportContent').innerHTML = '<div class="notices-empty">Loading report...</div>';
+
+  try {
+    const SUPA_URL = 'https://orfhhiyaigeokebwglkb.supabase.co';
+    const SUPA_KEY = 'sb_publishable_BsLkDNVCE4FrJ-P4i5eGIw_euUo4SNm';
+    const headers = { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' };
+    const res = await fetch(`${SUPA_URL}/rest/v1/rpc/get_parent_view`, { method: 'POST', headers, body: JSON.stringify({ p_token: parentToken }) });
+    const pvData = await res.json();
+
+    if (!pvData || pvData.code) {
+      document.getElementById('cvStudentName').textContent = 'Invalid Token';
+      document.getElementById('cvStudentMeta').textContent = 'Please check with your teacher.';
+      return;
+    }
+
+    const sid = pvData.student_id;
+    const settRow = pvData.settings;
+    const pvCfg = Object.assign({ school: '', class: '', teacher: '', term: '', session: '', weeks: 13 }, settRow?.cfg || {});
+    const pvStudents = settRow?.students || [];
+    const student = pvStudents.find(s => String(s.id) === String(sid));
+
+    if (!student) {
+      document.getElementById('cvStudentName').textContent = 'Student Not Found';
+      document.getElementById('cvStudentMeta').textContent = 'Please contact the teacher.';
+      return;
+    }
+
+    // ── HEADER ──
+    document.getElementById('cvStudentName').textContent = student.name || student.n || 'Student';
+    document.getElementById('cvStudentMeta').textContent = `${pvCfg.class} · ${pvCfg.term} ${pvCfg.session} · ${pvCfg.school}`.toUpperCase();
+
+    // ── ATTENDANCE ──
+    const attRows = pvData.attendance || [];
+    const pvAtt = {};
+    attRows.forEach(r => {
+      if (!pvAtt[r.week]) pvAtt[r.week] = {};
+      if (!pvAtt[r.week][r.day]) pvAtt[r.week][r.day] = {};
+      pvAtt[r.week][r.day][r.student_id] = r.mark;
+    });
+    const PV_DAYS = ['Mon','Tue','Wed','Thu','Fri'];
+    const weeks = pvCfg.weeks || 13;
+    let p = 0, a = 0, l = 0, marked = 0;
+    const flagWeeks = [], absentDetail = [];
+    for (let w = 1; w <= weeks; w++) {
+      let wA = 0; const absDays = [];
+      for (let d = 0; d < 5; d++) {
+        const v = (pvAtt[w] && pvAtt[w][d] && pvAtt[w][d][sid]) || '';
+        if (v === 'P') p++; else if (v === 'A') { a++; wA++; absDays.push(PV_DAYS[d]); } else if (v === 'L') l++;
+        if (v) marked++;
+      }
+      if (wA >= 2) flagWeeks.push(`Week ${w}`);
+      if (absDays.length) absentDetail.push({ week: w, days: absDays });
+    }
+    const pct = marked > 0 ? Math.round(((p + l) / marked) * 100) + '%' : '—';
+    const starsRows = pvData.stars ? [pvData.stars] : [];
+    const starsRow = (Array.isArray(starsRows) ? starsRows : []).find(r => String(r.student_id) === String(sid));
+    const stars = starsRow?.count || 0;
+
+    document.getElementById('cvPresent').textContent = p + l;
+    document.getElementById('cvPct').textContent = pct;
+    document.getElementById('cvAbsent').textContent = a;
+    document.getElementById('cvStars').textContent = '⭐ ' + stars;
+
+    document.getElementById('cvAbsenceRecord').innerHTML = absentDetail.length ? `
+      <div class="cv-absence-card">
+        <div class="cv-section-title" style="color:var(--red);">📅 Absence Record</div>
+        ${absentDetail.map(({week,days}) => `<div class="cv-absence-row"><span style="font-weight:700;">Week ${week}</span><span>${days.join(', ')}</span></div>`).join('')}
+      </div>` : '';
+
+    document.getElementById('cvAlertBanner').innerHTML = flagWeeks.length ? `
+      <div class="cv-alert">
+        <div style="font-size:12px;font-weight:800;color:#856404;margin-bottom:4px;">⚠️ Attendance Alert</div>
+        <div style="font-size:11px;color:#856404;">Multiple absences in: ${flagWeeks.join(', ')}</div>
+      </div>` : '';
+
+    // ── GRADES ──
+    const gradesRows = pvData.grades || [];
+    const pvGradesStudents = settRow?.grades_students || [];
+    const studentNameLower = (student.name || student.n || '').toLowerCase().trim();
+    const matchedGStu = pvGradesStudents.find(gs => (gs.name || '').toLowerCase().trim() === studentNameLower);
+    const PV_CA = [{key:'ca1',label:'1st CA',max:10},{key:'ca2',label:'2nd CA',max:10},{key:'proj',label:'Project',max:10},{key:'hw',label:'H/Work',max:10},{key:'exam',label:'Exam',max:60}];
+
+    if (matchedGStu) {
+      const gradeRow = (Array.isArray(gradesRows) ? gradesRows : []).find(r => String(r.student_id) === String(matchedGStu.gid));
+      const pvGradesScores = gradeRow?.scores || null;
+      const pvGradesSubjects = matchedGStu.subjects || [];
+
+      if (pvGradesScores && pvGradesSubjects.length) {
+        const totals = pvGradesSubjects.map(sub => PV_CA.reduce((sum,c) => sum + (parseFloat((pvGradesScores[sub] || {})[c.key]) || 0), 0));
+        const hasAny = totals.some(t => t > 0);
+
+        if (hasAny) {
+          // Position calculation
+          const calcAvg = (gstu) => {
+            const subs = gstu.subjects || [];
+            if (!subs.length) return null;
+            const gRow = (Array.isArray(gradesRows) ? gradesRows : []).find(r => String(r.student_id) === String(gstu.gid));
+            const sc = gRow?.scores || {};
+            const ts = subs.map(sub => PV_CA.reduce((sum,c) => sum + (parseFloat((sc[sub]||{})[c.key])||0), 0));
+            return ts.some(t => t > 0) ? ts.reduce((a,b)=>a+b,0)/subs.length : null;
+          };
+          const myAvg = totals.reduce((a,b)=>a+b,0)/pvGradesSubjects.length;
+          const allAvgs = pvGradesStudents.map(gs => calcAvg(gs)).filter(v => v !== null);
+          const position = allAvgs.filter(v => v > myAvg).length + 1;
+          const ordinal = n => { const s=['th','st','nd','rd']; const v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); };
+          const grandAvg = myAvg;
+          const grade = grandAvg>=80?'A':grandAvg>=65?'B':grandAvg>=50?'C':grandAvg>=40?'D':'F';
+          const remark = {A:'Excellent',B:'Very Good',C:'Good',D:'Pass',F:'Fail'}[grade];
+          const gradeColor = grandAvg>=80?'var(--green)':grandAvg>=65?'var(--navy)':grandAvg>=50?'var(--gold)':'var(--red)';
+
+          const subjectRows = pvGradesSubjects.map(sub => {
+            const scores = pvGradesScores[sub] || {};
+            const total = PV_CA.reduce((sum,c) => sum + (parseFloat(scores[c.key])||0), 0);
+            const totalColor = total>=80?'var(--green)':total>=50?'var(--navy)':'var(--red)';
+            const caHtml = PV_CA.map(c => {
+              const v = scores[c.key] != null && scores[c.key] !== '' ? scores[c.key] : '—';
+              return `<td style="text-align:center;padding:5px 3px;font-size:11px;color:${c.key==='exam'?'var(--navy)':'var(--ink)'};font-weight:${c.key==='exam'?'700':'400'};">${v}<span style="font-size:9px;color:var(--muted);">/${c.max}</span></td>`;
+            }).join('');
+            return `<tr style="border-bottom:1px solid rgba(0,0,0,.05);">
+              <td style="padding:6px 8px;font-size:12px;font-weight:600;color:var(--ink);">${sub}</td>
+              ${caHtml}
+              <td style="text-align:center;padding:5px 3px;font-size:12px;font-weight:700;color:${totalColor};">${total}<span style="font-size:9px;color:var(--muted);">/100</span></td>
+            </tr>`;
+          }).join('');
+
+          document.getElementById('cvGradesContent').innerHTML = `
+            <div class="cv-section">
+              <div class="cv-section-title">📚 Academic Performance</div>
+              <div class="cv-table-wrap">
+                <table class="cv-table">
+                  <thead><tr>
+                    <th style="text-align:left;padding-left:8px;">Subject</th>
+                    <th>1st CA</th><th>2nd CA</th><th>Proj</th><th>H/Work</th><th>Exam</th><th>Total</th>
+                  </tr></thead>
+                  <tbody>${subjectRows}</tbody>
+                </table>
+              </div>
+              <div class="cv-grades-summary">
+                <div class="cv-summary-tile"><div class="cv-summary-val" style="color:${gradeColor};">${grandAvg.toFixed(1)}</div><div class="cv-summary-label">Average</div></div>
+                <div class="cv-summary-tile"><div class="cv-summary-val" style="color:${gradeColor};">${grade}</div><div class="cv-summary-label">Grade</div></div>
+                <div class="cv-summary-tile"><div class="cv-summary-val" style="color:${gradeColor};font-size:13px;">${remark}</div><div class="cv-summary-label">Remark</div></div>
+                <div class="cv-summary-tile"><div class="cv-summary-val" style="color:var(--gold);">${ordinal(position)}</div><div class="cv-summary-label">of ${allAvgs.length}</div></div>
+              </div>
+            </div>`;
+        } else {
+          document.getElementById('cvGradesContent').innerHTML = '<div class="notices-empty">No grades recorded yet.</div>';
+        }
+      } else {
+        document.getElementById('cvGradesContent').innerHTML = '<div class="notices-empty">No grades recorded yet.</div>';
+      }
+    } else {
+      document.getElementById('cvGradesContent').innerHTML = '<div class="notices-empty">No grades recorded yet.</div>';
+    }
+
+    // ── REPORT ──
+    const reportRow = pvData.report || null;
+    if (reportRow) {
+      const traits = [
+        {key:'attentiveness',label:'Attentiveness'},{key:'assignment_completion',label:'Assignment Completion'},
+        {key:'reading_ability',label:'Reading Ability'},{key:'behaviour',label:'Behaviour'},
+        {key:'respect',label:'Respect for Authority'},{key:'confidence',label:'Confidence'},
+        {key:'punctuality',label:'Punctuality'},{key:'effort',label:'Effort / Hard Work'},
+        {key:'participation',label:'Participation in Class'},{key:'neatness',label:'Neatness'}
+      ];
+      const traitRows = traits.map(t => {
+        const v = reportRow[t.key] || 0;
+        const badge = v > 0
+          ? `<span class="cv-score-badge">${v}</span><span style="font-size:10px;color:var(--muted);margin-left:3px;">/5</span>`
+          : `<span style="font-size:11px;color:var(--muted);">Not rated</span>`;
+        return `<div class="cv-trait-row"><span class="cv-trait-name">${t.label}</span><span style="display:flex;align-items:center;">${badge}</span></div>`;
+      }).join('');
+      const comment = reportRow.comment ? `<div class="cv-comment">💬 ${reportRow.comment}</div>` : '';
+      document.getElementById('cvReportContent').innerHTML = `
+        <div class="cv-section">
+          <div class="cv-section-title">📒 Teacher's Report — Week ${reportRow.week || ''}</div>
+          ${traitRows}${comment}
+        </div>`;
+    } else {
+      document.getElementById('cvReportContent').innerHTML = '<div class="notices-empty">No report available yet.</div>';
+    }
+
+    // ── FOOTER ──
+    ['cvAttTab','cvGradesTab','cvReportTab'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        const footer = document.createElement('div');
+        footer.className = 'cv-footer';
+        footer.textContent = `${pvCfg.school || 'Jewel Model Primary School'} · Powered by Class Register`;
+        el.appendChild(footer);
+      }
+    });
+
+  } catch (err) {
+    document.getElementById('cvStudentName').textContent = 'Could Not Load';
+    document.getElementById('cvStudentMeta').textContent = 'Check your connection and try again.';
+    console.warn('Child view error:', err);
+  }
+}
+
+function switchChildTab(btn, tabId) {
+  document.querySelectorAll('.child-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  ['cvAttTab','cvGradesTab','cvReportTab'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = id === tabId ? 'flex' : 'none';
+  });
 }
 
 function showParentOptions() {
@@ -949,7 +1264,7 @@ function openSection(section) {
   const sectionMap = { notices: 'vNotices', feedback: 'vFeedback', circulars: 'vCirculars', staffmgmt: 'vStaffMgmt' };
   const titleMap = { notices: '📢 Noticeboard', feedback: '📬 Feedback', circulars: '📄 Circulars', staffmgmt: '👥 Staff Management' };
   const isStaff = currentRole === 'admin' || currentRole === 'teacher';
-  ['vHome','vNotices','vFeedback','vCirculars','vStaffMgmt'].forEach(v => {
+  ['vHome','vNotices','vFeedback','vCirculars','vStaffMgmt','vChildView'].forEach(v => {
     document.getElementById(v)?.classList.remove('on');
   });
   document.getElementById(sectionMap[section]).classList.add('on');
@@ -983,7 +1298,7 @@ function goHome() {
     return;
   }
   currentSection = null;
-  ['vNotices','vFeedback','vCirculars','vStaffMgmt'].forEach(v => {
+  ['vNotices','vFeedback','vCirculars','vStaffMgmt','vChildView'].forEach(v => {
     document.getElementById(v)?.classList.remove('on');
   });
   document.getElementById('vHome').classList.add('on');
