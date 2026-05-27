@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
 <meta name="theme-color" content="#0d1e3a"/>
-<title>JMS-N · Jewel Model School Notice</title>
+<title>Jewel Model Notification Board</title>
 <link id="pwa-manifest" rel="manifest" href=""/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -230,8 +230,8 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
 
 <!-- LOADING -->
 <div class="loading" id="loading">
-  <div class="loading-logo">JMS-N</div>
-  <div class="loading-sub">Jewel Model School Notice</div>
+  <div class="loading-logo" style="font-size:28px;letter-spacing:3px;">JEWEL MODEL</div>
+  <div class="loading-sub">Notification Board</div>
   <div class="spinner"></div>
 </div>
 
@@ -284,7 +284,7 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
 <div class="auth-screen hidden" id="authScreen">
   <div class="auth-card">
     <button class="auth-back-btn ripple" onclick="showWelcome()">← Back</button>
-    <div class="auth-logo">JMS-N</div>
+    <div class="auth-logo" style="font-size:22px;letter-spacing:2px;">JEWEL MODEL</div>
     <div class="auth-sub">Staff Portal</div>
     <div id="authError" class="auth-error hidden"></div>
     <input type="email" id="authEmail" placeholder="Email address" class="auth-input"/>
@@ -298,7 +298,7 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
 <div class="auth-screen hidden" id="parentOptionsScreen">
   <div class="auth-card">
     <button class="auth-back-btn ripple" onclick="showWelcome()">← Back</button>
-    <div class="auth-logo">JMS-N</div>
+    <div class="auth-logo" style="font-size:22px;letter-spacing:2px;">JEWEL MODEL</div>
     <div class="auth-sub">Parent Access</div>
     <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
       <button onclick="enterAsPublic()" style="width:100%;background:var(--gold);color:var(--navy);border:none;border-radius:14px;padding:18px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:14px;">
@@ -323,7 +323,7 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
 <div class="auth-screen hidden" id="parentTokenScreen">
   <div class="auth-card">
     <button class="auth-back-btn ripple" onclick="showParentOptions()">← Back</button>
-    <div class="auth-logo">JMS-N</div>
+    <div class="auth-logo" style="font-size:22px;letter-spacing:2px;">JEWEL MODEL</div>
     <div class="auth-sub">Enter Your Child's Link</div>
     <p style="font-size:11px;color:rgba(255,255,255,.4);text-align:center;margin-bottom:16px;line-height:1.6;">Paste the link your teacher sent you, or just the code at the end after <strong style="color:rgba(255,255,255,.6);">?pv=</strong></p>
     <div id="parentTokenError" class="auth-error hidden"></div>
@@ -336,7 +336,7 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
 <div class="auth-screen hidden" id="classPickerScreen">
   <div class="auth-card">
     <button class="auth-back-btn ripple" onclick="showWelcome()">← Back</button>
-    <div class="auth-logo">JMS-N</div>
+    <div class="auth-logo" style="font-size:22px;letter-spacing:2px;">JEWEL MODEL</div>
     <div class="auth-sub">Select Your Class</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
       <button onclick="selectClass('Basic 1')" style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);color:#fff;border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;">
@@ -373,14 +373,14 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
   <!-- HEADER -->
   <header class="app-header">
     <div class="app-header-left">
-      <button class="back-btn" id="backBtn" onclick="goHome()" style="display:none;">←</button>
-      <div class="app-logo">JMS-N</div>
+      <button class="back-btn" id="backBtn" onclick="goHome()">←</button>
+      <div class="app-logo" style="font-size:13px;letter-spacing:1px;">JEWEL MODEL</div>
       <span class="app-section-title" id="sectionTitle"></span>
     </div>
     <div class="app-header-right">
       <span class="role-badge" id="headerRole"></span>
-      <button class="signout-btn" id="signoutBtn" onclick="signOut()" style="display:none;">Sign Out</button>
-      <button class="signout-btn" id="parentSignoutBtn" onclick="parentSignOut()" style="display:none;background:rgba(201,164,74,.15);color:var(--gold);">Exit</button>
+      <button class="signout-btn" id="signoutBtn" onclick="signOut()">Sign Out</button>
+      <button class="signout-btn" id="parentSignoutBtn" onclick="parentSignOut()" style="background:rgba(201,164,74,.15);color:var(--gold);">Exit</button>
     </div>
   </header>
 
@@ -582,11 +582,11 @@ let currentSection = null; // 'notices' | 'feedback' | 'circulars'
 
 // ── PWA MANIFEST ─────────────────────────────────────────────────────────────
 const manifest = {
-  name: 'JMS-N', short_name: 'JMS-N',
-  description: 'Jewel Model School Notice',
+  name: 'Jewel Model Notification Board', short_name: 'JMNB',
+  description: 'Jewel Model Notification Board',
   start_url: './', display: 'standalone',
   background_color: '#0d1e3a', theme_color: '#0d1e3a', orientation: 'portrait',
-  icons: [{ src: "data:image/svg+xml," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='#0d1e3a'/><text x='96' y='120' font-size='48' font-family='Georgia' font-weight='bold' fill='#c9a44a' text-anchor='middle'>JMS-N</text></svg>`), sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' }]
+  icons: [{ src: "data:image/svg+xml," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='#0d1e3a'/><text x='96' y='120' font-size='48' font-family='Georgia' font-weight='bold' fill='#c9a44a' text-anchor='middle'>JMNB</text></svg>`), sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' }]
 };
 document.getElementById('pwa-manifest').href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/json' }));
 
@@ -607,20 +607,14 @@ window.addEventListener('popstate', (e) => {
 });
 
 async function checkSession() {
-  // Restore saved parent token
-  const savedToken = localStorage.getItem('jmsn_parent_token');
-  if (savedToken) parentToken = savedToken;
-
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await loadUserRole();
-    hideLoading();
-    showApp();
-  } else {
-    hideLoading();
-    showWelcome();
-  }
+  // Always sign out any existing session and show welcome screen
+  await sb.auth.signOut();
+  localStorage.removeItem('jmsn_parent_token');
+  parentToken = null;
+  currentUser = null;
+  currentRole = 'public';
+  hideLoading();
+  showWelcome();
 }
 
 function hideLoading() {
@@ -706,6 +700,7 @@ async function showApp() {
   document.getElementById('headerRole').textContent = roleLabel;
   document.getElementById('signoutBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('parentSignoutBtn').style.display = isStaff ? 'none' : 'block';
+  document.getElementById('backBtn').style.display = 'flex';
   // Load parent student data if parent_child
   if (isParentChild && parentToken && !parentStudentData) {
     const headers = { 'apikey': 'sb_publishable_BsLkDNVCE4FrJ-P4i5eGIw_euUo4SNm', 'Authorization': 'Bearer sb_publishable_BsLkDNVCE4FrJ-P4i5eGIw_euUo4SNm', 'Content-Type': 'application/json' };
@@ -767,6 +762,9 @@ async function signOut() {
   await sb.auth.signOut();
   currentUser = null;
   currentRole = 'public';
+  currentUserAssignedClass = null;
+  selectedClass = null;
+  currentSection = null;
   document.getElementById('app').classList.add('hidden');
   showWelcome();
 }
@@ -905,7 +903,6 @@ function openSection(section) {
   document.getElementById('sectionTitle').textContent = titleMap[section];
   document.getElementById('backBtn').style.display = 'flex';
 
-  // Section-specific setup
   if (section === 'notices') {
     document.getElementById('staffNoticeActions').style.display = isStaff ? 'flex' : 'none';
   }
@@ -929,13 +926,18 @@ function openSection(section) {
 }
 
 function goHome() {
+  if (!currentSection) {
+    // Already on home — back button goes to welcome screen
+    signOut();
+    return;
+  }
   currentSection = null;
   ['vNotices','vFeedback','vCirculars','vStaffMgmt'].forEach(v => {
     document.getElementById(v)?.classList.remove('on');
   });
   document.getElementById('vHome').classList.add('on');
   document.getElementById('sectionTitle').textContent = '';
-  document.getElementById('backBtn').style.display = 'none';
+  document.getElementById('backBtn').style.display = 'flex';
 }
 
 // ── TOAST ────────────────────────────────────────────────────────────────────
@@ -1317,7 +1319,7 @@ function downloadCircularPdf(id) {
   doc.text(lines, 14, 58);
   doc.setFillColor(...navy); doc.rect(0,287,PW,10,'F');
   doc.setTextColor(...gold); doc.setFontSize(7);
-  doc.text('Jewel Model Primary School · JMS-N', PW/2, 293, { align: 'center' });
+  doc.text('Jewel Model Primary School · Notification Board', PW/2, 293, { align: 'center' });
   doc.save(`${c.title.replace(/\s+/g,'_')}_Circular.pdf`);
   toast('📄 PDF downloaded');
 }
@@ -1355,16 +1357,16 @@ async function loadStaffList() {
 
 async function updateStaffClass(userId, assignedClass) {
   const { error } = await sb.from('profiles').update({ assigned_class: assignedClass || null }).eq('id', userId);
-  if (error) { toast('Failed to update class'); return; }
-  toast(`✅ Class updated`);
+  if (error) { toast('Failed to update class: ' + error.message); return; }
+  toast('✅ Class updated');
   loadStaffList();
 }
 
 async function updateStaffRole(userId, role) {
   if (userId === currentUser?.id) { toast('You cannot change your own role'); loadStaffList(); return; }
   const { error } = await sb.from('profiles').update({ role }).eq('id', userId);
-  if (error) { toast('Failed to update role'); return; }
-  toast(`✅ Role updated`);
+  if (error) { toast('Failed to update role: ' + error.message); return; }
+  toast('✅ Role updated');
   loadStaffList();
 }
 
