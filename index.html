@@ -364,6 +364,15 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
         <div style="font-size:13px;font-weight:700;">Basic 6</div>
       </button>
     </div>
+    <div style="margin-top:12px;border-top:1px solid rgba(255,255,255,.1);padding-top:12px;">
+      <button onclick="selectClass('Admin')" style="width:100%;background:rgba(201,164,74,.12);border:1.5px solid rgba(201,164,74,.3);color:var(--gold);border-radius:14px;padding:14px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <span style="font-size:20px;">🔐</span>
+        <div style="text-align:left;">
+          <div style="font-size:13px;font-weight:700;">Admin Login</div>
+          <div style="font-size:10px;opacity:.6;margin-top:2px;">For school administrators only</div>
+        </div>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -416,6 +425,15 @@ html,body{height:100%;font-family:'Outfit',sans-serif;background:#f4f1ec;color:#
             <div class="fb-card-title">📝 Share Your Thoughts</div>
             <p class="fb-card-sub">Your feedback helps us improve. Your name is optional and your message is private.</p>
             <input type="text" id="fbName" placeholder="Your name (optional)" class="fb-input"/>
+            <select id="fbClass" class="fb-input">
+              <option value="">— Select your child's class —</option>
+              <option value="Basic 1">Basic 1</option>
+              <option value="Basic 2">Basic 2</option>
+              <option value="Basic 3">Basic 3</option>
+              <option value="Basic 4">Basic 4</option>
+              <option value="Basic 5">Basic 5</option>
+              <option value="Basic 6">Basic 6</option>
+            </select>
             <textarea id="fbMessage" placeholder="Write your feedback or complaint here..." class="fb-textarea" rows="5"></textarea>
             <button class="fb-submit-btn ripple" onclick="submitFeedback()">Submit Feedback</button>
           </div>
@@ -592,10 +610,43 @@ document.getElementById('pwa-manifest').href = URL.createObjectURL(new Blob([JSO
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
+  // Check if opened via a parent token link (?pv=...)
+  const urlParams = new URLSearchParams(window.location.search);
+  const pvToken = urlParams.get('pv');
+  if (pvToken) {
+    // Check if running as installed PWA
+    const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (!isInstalled) {
+      // Show web prompt instead of loading app
+      document.getElementById('loading').classList.add('hidden');
+      showWebPrompt(pvToken);
+      return;
+    }
+    // Running as PWA — pre-fill token and go straight to token screen
+    localStorage.setItem('jmsn_pv_token', pvToken);
+  }
   await checkSession();
-  // Push initial state
   history.pushState({ section: null }, '');
 });
+
+function showWebPrompt(token) {
+  const prompt = document.createElement('div');
+  prompt.style.cssText = 'position:fixed;inset:0;background:#0d1e3a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;z-index:9999;';
+  prompt.innerHTML = `
+    <div style="font-family:\'Playfair Display\',serif;font-size:28px;font-weight:900;letter-spacing:3px;color:#c9a44a;margin-bottom:8px;">JEWEL MODEL</div>
+    <div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);text-transform:uppercase;margin-bottom:40px;">Notification Board</div>
+    <div style="background:rgba(255,255,255,.06);border:1.5px solid rgba(201,164,74,.2);border-radius:20px;padding:28px 24px;width:100%;max-width:360px;text-align:center;">
+      <div style="font-size:36px;margin-bottom:16px;">📱</div>
+      <div style="font-size:17px;font-weight:700;color:#fff;margin-bottom:10px;">Open in the App</div>
+      <p style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:24px;">This link is meant to be opened inside the <strong style="color:rgba(255,255,255,.8);">Jewel Model Notification Board</strong> app. Please open the app and use the <em>My Child's Info</em> option to enter your token.</p>
+      <div style="background:rgba(201,164,74,.1);border:1px solid rgba(201,164,74,.25);border-radius:12px;padding:12px;margin-bottom:20px;">
+        <div style="font-size:10px;color:rgba(201,164,74,.7);margin-bottom:4px;">YOUR TOKEN</div>
+        <div style="font-size:13px;font-weight:700;color:#c9a44a;word-break:break-all;">${token}</div>
+      </div>
+      <p style="font-size:11px;color:rgba(255,255,255,.3);line-height:1.6;">Copy the token above and paste it in the app under <strong style="color:rgba(255,255,255,.5);">I'm a Parent → My Child's Info</strong>.</p>
+    </div>`;
+  document.body.appendChild(prompt);
+}
 
 window.addEventListener('popstate', (e) => {
   if (currentSection) {
@@ -607,7 +658,6 @@ window.addEventListener('popstate', (e) => {
 });
 
 async function checkSession() {
-  // Always sign out any existing session and show welcome screen
   await sb.auth.signOut();
   localStorage.removeItem('jmsn_parent_token');
   parentToken = null;
@@ -679,7 +729,8 @@ function selectClass(cls) {
   selectedClass = cls;
   document.getElementById('classPickerScreen').classList.add('hidden');
   document.getElementById('authScreen').classList.remove('hidden');
-  document.querySelector('.auth-sub').textContent = cls + ' · Staff Portal';
+  const label = cls === 'Admin' ? 'Admin Portal' : cls + ' · Staff Portal';
+  document.querySelector('.auth-sub').textContent = label;
 }
 
 function enterAsPublic() {
@@ -701,7 +752,6 @@ async function showApp() {
   document.getElementById('signoutBtn').style.display = isStaff ? 'block' : 'none';
   document.getElementById('parentSignoutBtn').style.display = isStaff ? 'none' : 'block';
   document.getElementById('backBtn').style.display = 'flex';
-  // Load parent student data if parent_child
   if (isParentChild && parentToken && !parentStudentData) {
     const headers = { 'apikey': 'sb_publishable_BsLkDNVCE4FrJ-P4i5eGIw_euUo4SNm', 'Authorization': 'Bearer sb_publishable_BsLkDNVCE4FrJ-P4i5eGIw_euUo4SNm', 'Content-Type': 'application/json' };
     const res = await fetch('https://orfhhiyaigeokebwglkb.supabase.co/rest/v1/rpc/get_parent_view', { method: 'POST', headers, body: JSON.stringify({ p_token: parentToken }) });
@@ -736,6 +786,13 @@ async function signIn() {
     await sb.auth.signOut();
     currentUser = null;
     showAuthError(`You are not assigned to ${selectedClass}. Please go back and select your correct class.`);
+    return;
+  }
+  // Admin tab selected but user is not actually admin
+  if (selectedClass === 'Admin' && currentRole !== 'admin') {
+    await sb.auth.signOut();
+    currentUser = null;
+    showAuthError('You do not have admin privileges.');
     return;
   }
 
@@ -875,7 +932,6 @@ function renderHomeTiles() {
       <span class="home-tile-arrow">→</span>
     </div>` : '';
 
-  // Staff Management tile — only for admin
   const staffMgmtTile = currentRole === 'admin' ? `
     <div class="home-tile ripple" onclick="openSection('staffmgmt')" style="flex:1;background:linear-gradient(135deg,#1a2e4a,#2a4a7a);color:#fff;">
       <div>
@@ -895,14 +951,12 @@ function openSection(section) {
   const sectionMap = { notices: 'vNotices', feedback: 'vFeedback', circulars: 'vCirculars', staffmgmt: 'vStaffMgmt' };
   const titleMap = { notices: '📢 Noticeboard', feedback: '📬 Feedback', circulars: '📄 Circulars', staffmgmt: '👥 Staff Management' };
   const isStaff = currentRole === 'admin' || currentRole === 'teacher';
-
   ['vHome','vNotices','vFeedback','vCirculars','vStaffMgmt'].forEach(v => {
     document.getElementById(v)?.classList.remove('on');
   });
   document.getElementById(sectionMap[section]).classList.add('on');
   document.getElementById('sectionTitle').textContent = titleMap[section];
   document.getElementById('backBtn').style.display = 'flex';
-
   if (section === 'notices') {
     document.getElementById('staffNoticeActions').style.display = isStaff ? 'flex' : 'none';
   }
@@ -920,15 +974,13 @@ function openSection(section) {
     document.getElementById('staffCircularActions').style.display = isStaff ? 'flex' : 'none';
     document.getElementById('circularParentBanner').style.display = isStaff ? 'none' : 'block';
   }
-  if (section === 'staffmgmt') {
-    loadStaffList();
-  }
+  if (section === 'staffmgmt') loadStaffList();
 }
 
 function goHome() {
   if (!currentSection) {
-    // Already on home — back button goes to welcome screen
-    signOut();
+    const isStaff = currentRole === 'admin' || currentRole === 'teacher';
+    if (isStaff) signOut(); else parentSignOut();
     return;
   }
   currentSection = null;
@@ -1128,9 +1180,13 @@ async function deleteFeedback(id) {
 const deletedFeedbackIds = new Set();
 
 async function loadFeedback(preserveDeleted = false) {
-  const { data } = await sb.from('feedback').select('*').order('created_at', { ascending: false });
+  let query = sb.from('feedback').select('*').order('created_at', { ascending: false });
+  // Teachers only see feedback for their class OR unclassified (null) feedback
+  if (currentRole === 'teacher' && currentUserAssignedClass) {
+    query = query.or(`class.eq.${currentUserAssignedClass},class.is.null`);
+  }
+  const { data } = await query;
   const raw = data || [];
-  // Filter out any items deleted locally this session
   feedbackItems = preserveDeleted ? raw.filter(f => !deletedFeedbackIds.has(f.id)) : raw;
   renderFeedbackList();
   const countEl = document.getElementById('inboxCount');
@@ -1161,12 +1217,15 @@ function renderFeedbackList() {
 
 async function submitFeedback() {
   const name = document.getElementById('fbName').value.trim();
+  const fbClass = document.getElementById('fbClass').value;
   const message = document.getElementById('fbMessage').value.trim();
+  if (!fbClass) { toast('Please select your child\'s class'); return; }
   if (!message) { toast('Please write your feedback'); return; }
-  const { data, error } = await sb.from('feedback').insert({ name: name || null, message }).select().single();
+  const { data, error } = await sb.from('feedback').insert({ name: name || null, message, class: fbClass }).select().single();
   if (error) { toast('Failed to submit feedback'); return; }
   const refNum = 'FB-' + data.id.slice(0, 4).toUpperCase();
   document.getElementById('fbName').value = '';
+  document.getElementById('fbClass').value = '';
   document.getElementById('fbMessage').value = '';
   document.getElementById('fbReplyResult').innerHTML = `<div class="fb-ref-badge">✅ Submitted! Your reference number:<br/><span class="fb-ref-num">${refNum}</span><br/>Keep this to check for a reply.</div>`;
   toast('✅ Feedback submitted');
